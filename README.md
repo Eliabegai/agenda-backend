@@ -33,8 +33,11 @@ $ pnpm run test:e2e
 # test coverage
 $ pnpm run test:cov
 ```
+
 ---
+
 ## Criar novo recurso completo
+
 ```sh
 nest g resource nome-da-rota
 ```
