@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Funcionario {
+  id                 Int                 @id @default(autoincrement())
+  nome               String
+  email              String              @unique
+  criadoEm           DateTime            @default(now())
+  atualizadoEm       DateTime            @updatedAt
+  horarios           Horario[]
+  agendamentos       Agendamento[]
+  indisponibilidades Indisponibilidade[]
+}
+
+model Horario {
+  id            Int         @id @default(autoincrement())
+  funcionario   Funcionario @relation(fields: [funcionarioId], references: [id])
+  funcionarioId Int
+  diaSemana     Int // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+  startTime     String // Formato HH:mm:ss
+  endTime       String // Formato HH:mm:ss
+  breakStart    String // Formato HH:mm:ss
+  breakEnd      String // Formato HH:mm:ss
+}
+
+model Agendamento {
+  id            Int               @id @default(autoincrement())
+  funcionario   Funcionario       @relation(fields: [funcionarioId], references: [id])
+  funcionarioId Int
+  protocolo     Protocolo         @relation(fields: [protocoloId], references: [id])
+  protocoloId   Int
+  dataHora      DateTime
+  criadoEm      DateTime          @default(now())
+  atualizadoEm  DateTime          @updatedAt
+  status        StatusAgendamento @default(AGENDADO)
+
+  @@unique([funcionarioId, dataHora]) // Garantindo funcionários diferentes tenham agendamentos no mesmo horário
+}
+
+model Cliente {
+  id           Int         @id @default(autoincrement())
+  nome         String
+  telefone     String
+  email        String
+  criadoEm     DateTime    @default(now())
+  atualizadoEm DateTime    @updatedAt
+  protocolos   Protocolo[]
+}
+
+model Protocolo {
+  id           Int           @id @default(autoincrement())
+  cliente      Cliente       @relation(fields: [clienteId], references: [id])
+  clienteId    Int
+  codigo       String
+  agendamentos Agendamento[]
+
+  @@unique([clienteId, codigo]) // Garantindo que um cliente não tenha protocolos duplicados
+}
+
+model Indisponibilidade {
+  id            Int         @id @default(autoincrement())
+  funcionario   Funcionario @relation(fields: [funcionarioId], references: [id])
+  funcionarioId Int
+  diasSemana    Int[] // Array de inteiros representando os dias afetados (0 = Domingo, ..., 6 = Sábado)
+  inicio        String // Formato HH:mm:ss
+  fim           String // Formato HH:mm:ss
+  dataInicio    DateTime? // Opcional, caso queira definir um período específico
+  dataFim       DateTime? // Opcional, para definir até quando a regra vale
+  motivo        String?
+}
+
+enum StatusAgendamento {
+  AGENDADO
+  CANCELADO
+  NAO_COMPARECEU
+  ENCERRADO
+}
