@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -37,7 +41,17 @@ export class AdminService {
     return users;
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
+    const existingAdmin = await this.prisma.admin.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!existingAdmin) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
     const userById = this.prisma.admin.findUnique({
       where: {
         id: id,
@@ -47,6 +61,16 @@ export class AdminService {
   }
 
   async update(id: number, updateAdminDto: UpdateAdminDto) {
+    const existingAdmin = await this.prisma.admin.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!existingAdmin) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
     await validateOrReject(updateAdminDto);
     if (updateAdminDto.senha) {
       updateAdminDto.senha = await bcrypt.hash(updateAdminDto.senha, 10);
@@ -60,12 +84,25 @@ export class AdminService {
     return updateUser;
   }
 
-  remove(id: number) {
-    const deleteUser = this.prisma.admin.delete({
+  async remove(id: number) {
+    const existingAdmin = await this.prisma.admin.findUnique({
       where: {
         id: id,
       },
     });
-    return deleteUser;
+
+    if (!existingAdmin) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    await this.prisma.admin.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return {
+      message: 'Usuário deletado com sucesso!',
+    };
   }
 }
