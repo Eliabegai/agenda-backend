@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -11,6 +11,17 @@ export class AdminService {
 
   async create(createAdminDto: CreateAdminDto) {
     await validateOrReject(createAdminDto);
+
+    const existingAdmin = await this.prisma.admin.findUnique({
+      where: {
+        email: createAdminDto.email,
+      },
+    });
+
+    if (existingAdmin) {
+      throw new ConflictException('Administrador com este email já existe');
+    }
+
     const hashedPassword = await bcrypt.hash(createAdminDto.senha, 10);
     const user = await this.prisma.admin.create({
       data: {
