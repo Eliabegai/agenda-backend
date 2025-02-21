@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateFuncionarioDto, HorarioDto } from './dto/create-funcionario.dto';
 import { UpdateFuncionarioDto } from './dto/update-funcionario.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -15,8 +15,7 @@ export class FuncionarioService {
       },
     });
 
-    if (!isAdmin)
-      throw new NotFoundException('Não tem permissão de administrador');
+    if (!isAdmin) throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
 
     await validateOrReject(createFuncionarioDto);
 
@@ -37,7 +36,7 @@ export class FuncionarioService {
     });
     return {
       message: 'Funcionário criado com sucesso',
-      data: await funcionario,
+      data: funcionario,
     };
   }
 
@@ -50,7 +49,7 @@ export class FuncionarioService {
 
     return {
       message: 'Funcionário criado com sucesso',
-      data: await funcionario,
+      data: funcionario,
     };
   }
 
@@ -66,19 +65,21 @@ export class FuncionarioService {
 
     return {
       message: 'Funcionário encontrado com sucesso',
-      data: await funcionario,
+      data: funcionario,
     };
   }
 
-  async update(id: number, updateFuncionarioDto: UpdateFuncionarioDto) {
+  async updateFuncionario(
+    funcionarioId: number,
+    updateFuncionarioDto: UpdateFuncionarioDto,
+  ) {
     const isAdmin = await this.prisma.admin.findUnique({
       where: {
         email: updateFuncionarioDto.adminEmail,
       },
     });
 
-    if (!isAdmin)
-      throw new NotFoundException('Não tem permissão de administrador');
+    if (!isAdmin) throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
 
     const updateData: any = {
       nome: updateFuncionarioDto.nome,
@@ -86,20 +87,12 @@ export class FuncionarioService {
     };
 
     if (updateFuncionarioDto.horarios) {
-      updateData.horarios = {
-        create: updateFuncionarioDto.horarios.map((horario: HorarioDto) => ({
-          diaSemana: horario.diaSemana,
-          startTime: horario.startTime,
-          endTime: horario.endTime,
-          breakStart: horario.breakStart ?? '',
-          breakEnd: horario.breakEnd ?? '',
-        })),
-      };
+      await this.updateHorarios(funcionarioId, updateFuncionarioDto.horarios);
     }
 
     const funcionario = await this.prisma.funcionario.update({
       where: {
-        id,
+        id: funcionarioId,
       },
       data: updateData,
       include: {
@@ -110,6 +103,49 @@ export class FuncionarioService {
     return {
       message: 'Funcionário atualizado com sucesso',
       data: funcionario,
+    };
+  }
+
+  async updateHorarios(id: number, horarios: HorarioDto[]) {
+    for (const horario of horarios) {
+      if (horario.id) {
+        await this.prisma.horario.update({
+          where: {
+            id: horario.id,
+          },
+          data: {
+            diaSemana: horario.diaSemana,
+            startTime: horario.startTime,
+            endTime: horario.endTime,
+            breakStart: horario.breakStart ?? '',
+            breakEnd: horario.breakEnd ?? '',
+          },
+        });
+      } else {
+        await this.prisma.horario.create({
+          data: {
+            funcionarioId: id,
+            diaSemana: horario.diaSemana,
+            startTime: horario.startTime,
+            endTime: horario.endTime,
+            breakStart: horario.breakStart ?? '',
+            breakEnd: horario.breakEnd ?? '',
+          },
+        });
+      }
+    }
+  }
+
+  async findHorariosFuncionario(id: number) {
+    const horarios = await this.prisma.horario.findMany({
+      where: {
+        funcionarioId: id,
+      },
+    });
+
+    return {
+      message: 'Horários encontrados',
+      data: horarios,
     };
   }
 
@@ -124,12 +160,92 @@ export class FuncionarioService {
     return horarioByFuncionario;
   }
 
-  updateHorario(
-    id: number,
-    horarioId: number,
-    // updateFuncionarioDto: UpdateFuncionarioDto,
+  async updateHorario(
+    idFuncionario: number,
+    updateFuncionarioDto: UpdateFuncionarioDto,
   ) {
-    return `Atualizar Horario ${horarioId} do funcionario ${id}`;
+    for (const horario of updateFuncionarioDto.horarios as HorarioDto[]) {
+      const existingHorario = await this.prisma.horario.findFirst({
+        where: {
+          funcionarioId: idFuncionario,
+          diaSemana: horario.diaSemana,
+        },
+      });
+
+      if (existingHorario) {
+        // Atualizar horário existente
+        await this.prisma.horario.update({
+          where: {
+            id: existingHorario.id,
+          },
+          data: {
+            startTime: horario.startTime,
+            endTime: horario.endTime,
+            breakStart: horario.breakStart ?? '',
+            breakEnd: horario.breakEnd ?? '',
+          },
+        });
+      } else {
+        // Adicionar novo horário
+        await this.prisma.horario.create({
+          data: {
+            funcionarioId: idFuncionario,
+            diaSemana: horario.diaSemana,
+            startTime: horario.startTime,
+            endTime: horario.endTime,
+            breakStart: horario.breakStart ?? '',
+            breakEnd: horario.breakEnd ?? '',
+          },
+        });
+      }
+    }
+
+    const updatedHorarios = await this.prisma.horario.findMany({
+      where: {
+        funcionarioId: idFuncionario,
+      },
+    });
+
+    return {
+      message: 'Horários atualizados com sucesso',
+      data: updatedHorarios,
+    };
+  }
+
+  async updateHorarioById(
+    funcionarioId: number,
+    horarioId: number,
+    updateHorarioDto: HorarioDto,
+    headers: Headers,
+  ) {
+    const admin = headers['admin'];
+
+    const isAdmin = await this.prisma.admin.findUnique({
+      where: {
+        email: admin,
+      },
+    });
+
+    if (!isAdmin) throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
+
+    const isExisting = await this.prisma.horario.findUnique({
+      where: {
+        id: horarioId,
+      },
+    });
+
+    if (!isExisting)
+      throw new HttpException('Horario não existe.', HttpStatus.NOT_FOUND);
+
+    const horario = await this.prisma.horario.update({
+      where: {
+        id: horarioId,
+        funcionarioId: funcionarioId,
+      },
+      data: updateHorarioDto,
+    });
+
+    return { message: 'This action updates a horario', data: horario };
   }
 
   async remove(id: number, adminEmail: string) {
@@ -139,8 +255,7 @@ export class FuncionarioService {
       },
     });
 
-    if (!isAdmin)
-      throw new NotFoundException('Não tem permissão de administrador');
+    if (!isAdmin) throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
 
     return `This action removes a #${id} funcionario`;
   }

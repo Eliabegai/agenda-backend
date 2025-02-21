@@ -6,9 +6,10 @@ import {
   Patch,
   Param,
   Delete,
+  Headers,
 } from '@nestjs/common';
 import { FuncionarioService } from './funcionario.service';
-import { CreateFuncionarioDto } from './dto/create-funcionario.dto';
+import { CreateFuncionarioDto, HorarioDto } from './dto/create-funcionario.dto';
 import { UpdateFuncionarioDto } from './dto/update-funcionario.dto';
 
 @Controller('funcionario')
@@ -35,7 +36,12 @@ export class FuncionarioController {
     @Param('id') id: string,
     @Body() updateFuncionarioDto: UpdateFuncionarioDto,
   ) {
-    return this.funcionarioService.update(+id, updateFuncionarioDto);
+    return this.funcionarioService.updateFuncionario(+id, updateFuncionarioDto);
+  }
+
+  @Get(':id/horario')
+  findHorariosFuncionario(@Param('id') id: string) {
+    return this.funcionarioService.findHorariosFuncionario(+id);
   }
 
   @Get(':id/horario/:horarioId')
@@ -48,11 +54,17 @@ export class FuncionarioController {
 
   @Patch(':id/horario/:horarioId')
   updateHorario(
-    @Param('id') id: string,
+    @Param('id') idFuncionario: string,
     @Param('horarioId') horarioId: string,
-    // @Body() updateFuncionarioDto: UpdateFuncionarioDto,
+    @Body() updateHorarioDto: HorarioDto,
+    @Headers() headers: Headers,
   ) {
-    return this.funcionarioService.updateHorario(+id, +horarioId);
+    return this.funcionarioService.updateHorarioById(
+      +idFuncionario,
+      +horarioId,
+      updateHorarioDto,
+      headers,
+    );
   }
 
   @Delete(':id')
