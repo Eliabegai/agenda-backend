@@ -1,0 +1,85 @@
+Agendamento
+Necessário tela para admin, outras telas não necessário login ou permissão.
+
+Tela 1 - Agendamento das Reuniões
+- Qualquer usuário pode acessar;
+- Listar agenda da semana (segunda a sábado);
+- Horários intercalando entre 30 minutos cada (8, 8:30, 9h...);
+- Conferir agenda dos funcionários quais horários disponíveis, os que estiver bloqueado, deixar o campo em cinza e não clicável;
+
+
+
+
+
+
+
+Tela 2
+
+
+
+
+
+
+Tela 3
+
+
+
+
+Funcionário - Dados
+- Id
+- Nome
+- Email
+- Telefone
+- Dias da semana disponível[]
+	{
+	    segunda: [[9, 9.3, 10, 10.3, 11, 11.3, 12],[13, 13.3, 14, 14.3, 15, 15.3, 16]],
+	    terca:   [[9, 9.3, 10, 10.3, 11, 11.3, 12],[13, 13.3, 14, 14.3, 15, 15.3, 16]],
+	    quarta:  [[9, 9.3, 10, 10.3, 11, 11.3, 12],[13, 13.3, 14, 14.3, 15, 15.3, 16]],
+	    quinta:  [[9, 9.3, 10, 10.3, 11, 11.3, 12],[13, 13.3, 14, 14.3, 15, 15.3, 16]],
+	    sexta:   [[9, 9.3, 10, 10.3, 11, 11.3, 12],[13, 13.3, 14, 14.3, 15, 15.3, 16]],
+	    sabado:  [[9, 9.3, 10, 10.3, 11, 11.3, 12],[13, 13.3, 14, 14.3, 15, 15.3, 16]]
+	}
+- Agendamento AgendaId
+
+
+
+
+Agendamento
+- Id
+- Data
+- Hora
+- Cliente ClienteId
+- Funcionário FuncionarioId
+
+
+
+
+Cliente
+- Id
+- Nome
+- Telefone
+- Email
+- Protocolo
+- Agendamento AgendaId
+
+
+
+----------------------------------------------------
+
+supabase
+apikey = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkZ29wamx4eGJjYWthcHphc2FwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwNDkzOTAsImV4cCI6MjA1NTYyNTM5MH0.g_FjIoDzNbNV-ArnLToIepI_FSVph5aiqR4eYI3wyzA
+
+service_role = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkZ29wamx4eGJjYWthcHphc2FwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MDA0OTM5MCwiZXhwIjoyMDU1NjI1MzkwfQ.92CzOuFzRA6aRc0sYz5zK3OmLHPJP3b6NGOCo5c48YY
+
+url = https://ydgopjlxxbcakapzasap.supabase.co
+
+jwt = ZIiNJDoTkFzIgm1Rk3QLM3yO4NtNFuHdBkh1bdTcNKx91hV3OBP3ZxsODpAYAwDd+jLiqQAkpIzInMfBtlmldw==
+
+
+
+
+-------------------------
+
+
+
+crie o backend com nodejs de uma agenda, onde terá 20 funcionários, cada um tem uma agenda particular (dia da semana específico que irá trabalhar e horário, exemplo: segunda, terça e quarta feira das 8 às 12h e 13 às 17h) nessa agenda será agendado de 30 em 30 minutos cada reunião. Irá verificar quais funcionários tem horário disponível e marcar para o primeiro. Isso para todos os funcionário, se não tiver mais essa hora disponível para ninguém, trancar na agenda. Para agendamento não é necessário ter login ou algum acesso, porém para cadastrar novo funcionário, ou editar precisa ter permissão de admin. banco de dados será em PostgreSQL. 
