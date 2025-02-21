@@ -1,12 +1,28 @@
-## Agenda
+# Agenda
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+<p>Sistema de agendamento para 20 funcionários com horários individuais.</p>
+<p>Permite marcação automática conforme disponibilidade, envio de notificações e gestão de bloqueios por administradores.</p>
+
+
 
 ## Project setup
 
 ```bash
 $ pnpm install
 ```
+
+## Configurar banco de dados com docker
+
+```bash
+$ docker-compose up -d
+```
+
+## Configurar .env
+
+```bash
+$ npx prisma migrate dev
+```
+
 
 ## Compile and run the project
 
