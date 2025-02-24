@@ -17,39 +17,58 @@ export class FuncionarioController {
   constructor(private readonly funcionarioService: FuncionarioService) {}
 
   @Post()
-  create(@Body() createFuncionarioDto: CreateFuncionarioDto) {
-    return this.funcionarioService.createFuncionario(createFuncionarioDto);
+  create(
+    @Body() createFuncionarioDto: CreateFuncionarioDto,
+    @Headers() headers: Headers,
+  ) {
+    return this.funcionarioService.createFuncionario(
+      createFuncionarioDto,
+      headers,
+    );
   }
 
   @Get()
-  findAll() {
-    return this.funcionarioService.findAll();
+  findAll(@Headers() headers: Headers) {
+    return this.funcionarioService.findAll(headers);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.funcionarioService.findOne(+id);
+  findOne(@Param('id') id: string, @Headers() headers: Headers) {
+    return this.funcionarioService.findOne(+id, headers);
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateFuncionarioDto: UpdateFuncionarioDto,
+    @Headers() headers: Headers,
   ) {
-    return this.funcionarioService.updateFuncionario(+id, updateFuncionarioDto);
+    return this.funcionarioService.updateFuncionario(
+      +id,
+      updateFuncionarioDto,
+      headers,
+    );
   }
 
   @Get(':id/horario')
-  findHorariosFuncionario(@Param('id') id: string) {
-    return this.funcionarioService.findHorariosFuncionario(+id);
+  findHorariosFuncionario(
+    @Param('id') id: string,
+    @Headers() headers: Headers,
+  ) {
+    return this.funcionarioService.findHorariosFuncionario(+id, headers);
   }
 
   @Get(':id/horario/:horarioId')
   findHorariosByFuncionario(
     @Param('id') id: string,
     @Param('horarioId') horarioId: string,
+    @Headers() headers: Headers,
   ) {
-    return this.funcionarioService.findHorariosByFuncionario(+id, +horarioId);
+    return this.funcionarioService.findHorariosByFuncionario(
+      +id,
+      +horarioId,
+      headers,
+    );
   }
 
   @Patch(':id/horario/:horarioId')
@@ -71,7 +90,12 @@ export class FuncionarioController {
   remove(
     @Param('id') id: string,
     @Body() createFuncionarioDto: CreateFuncionarioDto,
+    @Headers() headers: Headers,
   ) {
-    return this.funcionarioService.remove(+id, createFuncionarioDto.adminEmail);
+    return this.funcionarioService.remove(
+      +id,
+      createFuncionarioDto.adminEmail,
+      headers,
+    );
   }
 }

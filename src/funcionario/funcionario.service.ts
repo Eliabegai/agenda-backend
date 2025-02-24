@@ -8,10 +8,14 @@ import { validateOrReject } from 'class-validator';
 export class FuncionarioService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createFuncionario(createFuncionarioDto: CreateFuncionarioDto) {
+  async createFuncionario(
+    createFuncionarioDto: CreateFuncionarioDto,
+    headers: Headers,
+  ) {
+    const admin = headers['admin'];
     const isAdmin = await this.prisma.admin.findUnique({
       where: {
-        email: createFuncionarioDto.adminEmail,
+        email: admin,
       },
     });
 
@@ -40,7 +44,9 @@ export class FuncionarioService {
     };
   }
 
-  async findAll() {
+  async findAll(headers: Headers) {
+    await this.isAdmin(headers);
+
     const funcionario = await this.prisma.funcionario.findMany({
       include: {
         horarios: true,
@@ -53,7 +59,9 @@ export class FuncionarioService {
     };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, headers: Headers) {
+    await this.isAdminOrFuncionario(headers);
+
     const funcionario = await this.prisma.funcionario.findUnique({
       where: {
         id,
@@ -72,14 +80,9 @@ export class FuncionarioService {
   async updateFuncionario(
     funcionarioId: number,
     updateFuncionarioDto: UpdateFuncionarioDto,
+    headers: Headers,
   ) {
-    const isAdmin = await this.prisma.admin.findUnique({
-      where: {
-        email: updateFuncionarioDto.adminEmail,
-      },
-    });
-
-    if (!isAdmin) throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
+    await this.isAdminOrFuncionario(headers);
 
     const updateData: any = {
       nome: updateFuncionarioDto.nome,
@@ -136,7 +139,8 @@ export class FuncionarioService {
     }
   }
 
-  async findHorariosFuncionario(id: number) {
+  async findHorariosFuncionario(id: number, headers: Headers) {
+    await this.isAdminOrFuncionario(headers);
     const horarios = await this.prisma.horario.findMany({
       where: {
         funcionarioId: id,
@@ -149,7 +153,12 @@ export class FuncionarioService {
     };
   }
 
-  async findHorariosByFuncionario(id: number, horarioId: number) {
+  async findHorariosByFuncionario(
+    id: number,
+    horarioId: number,
+    headers: Headers,
+  ) {
+    await this.isAdminOrFuncionario(headers);
     const horarioByFuncionario = await this.prisma.horario.findMany({
       where: {
         funcionarioId: id,
@@ -218,15 +227,7 @@ export class FuncionarioService {
     updateHorarioDto: HorarioDto,
     headers: Headers,
   ) {
-    const admin = headers['admin'];
-
-    const isAdmin = await this.prisma.admin.findUnique({
-      where: {
-        email: admin,
-      },
-    });
-
-    if (!isAdmin) throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
+    await this.isAdminOrFuncionario(headers);
 
     const isExisting = await this.prisma.horario.findUnique({
       where: {
@@ -248,7 +249,41 @@ export class FuncionarioService {
     return { message: 'This action updates a horario', data: horario };
   }
 
-  async remove(id: number, adminEmail: string) {
+  async remove(id: number, adminEmail: string, headers: Headers) {
+    await this.isAdminOrFuncionario(headers);
+
+    return `This action removes a #${id} funcionario`;
+  }
+
+  private async isAdminOrFuncionario(headers: Headers) {
+    const adminEmail = headers['admin'] || '';
+    const funcionarioEmail = headers['funcionario'] || '';
+
+    if (!adminEmail && !funcionarioEmail)
+      throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
+
+    const isAdmin = await this.prisma.admin.findUnique({
+      where: {
+        email: adminEmail,
+      },
+    });
+
+    const isFuncionario = await this.prisma.funcionario.findUnique({
+      where: {
+        email: funcionarioEmail,
+      },
+    });
+
+    if (!isAdmin && !isFuncionario)
+      throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
+  }
+
+  private async isAdmin(headers: Headers) {
+    const adminEmail = headers['admin'] || '';
+
+    if (!adminEmail)
+      throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
+
     const isAdmin = await this.prisma.admin.findUnique({
       where: {
         email: adminEmail,
@@ -256,7 +291,5 @@ export class FuncionarioService {
     });
 
     if (!isAdmin) throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
-
-    return `This action removes a #${id} funcionario`;
   }
 }
