@@ -55,6 +55,10 @@ $ pnpm run test:cov
 ## Criar novo recurso completo
 
 ```sh
+# caso não tenha instalado
+npm i -g @nestjs/cli 
+
+# criar recurso
 nest g resource nome-da-rota
 ```
 
