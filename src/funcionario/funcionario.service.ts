@@ -12,14 +12,7 @@ export class FuncionarioService {
     createFuncionarioDto: CreateFuncionarioDto,
     headers: Headers,
   ) {
-    const admin = headers['admin'];
-    const isAdmin = await this.prisma.admin.findUnique({
-      where: {
-        email: admin,
-      },
-    });
-
-    if (!isAdmin) throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
+    await this.isAdmin(headers);
 
     await validateOrReject(createFuncionarioDto);
 
@@ -49,7 +42,11 @@ export class FuncionarioService {
 
     const funcionario = await this.prisma.funcionario.findMany({
       include: {
-        horarios: true,
+        horarios: {
+          orderBy: {
+            diaSemana: 'asc',
+          },
+        },
       },
     });
 
@@ -77,7 +74,43 @@ export class FuncionarioService {
     };
   }
 
-  async updateFuncionario(
+  async findHorariosFuncionarioById(id: number, headers: Headers) {
+    await this.isAdminOrFuncionario(headers);
+    const horarios = await this.prisma.horario.findMany({
+      where: {
+        funcionarioId: id,
+      },
+      orderBy: {
+        diaSemana: 'asc',
+      },
+    });
+
+    return {
+      message: 'Horários encontrados',
+      data: horarios,
+    };
+  }
+
+  async findHorariosIdByFuncionario(
+    id: number,
+    horarioId: number,
+    headers: Headers,
+  ) {
+    await this.isAdminOrFuncionario(headers);
+    const horarioByFuncionario = await this.prisma.horario.findMany({
+      where: {
+        funcionarioId: id,
+        id: horarioId,
+      },
+      orderBy: {
+        diaSemana: 'asc',
+      },
+    });
+
+    return horarioByFuncionario;
+  }
+
+  async updateFuncionarioById(
     funcionarioId: number,
     updateFuncionarioDto: UpdateFuncionarioDto,
     headers: Headers,
@@ -109,119 +142,7 @@ export class FuncionarioService {
     };
   }
 
-  async updateHorarios(id: number, horarios: HorarioDto[]) {
-    for (const horario of horarios) {
-      if (horario.id) {
-        await this.prisma.horario.update({
-          where: {
-            id: horario.id,
-          },
-          data: {
-            diaSemana: horario.diaSemana,
-            startTime: horario.startTime,
-            endTime: horario.endTime,
-            breakStart: horario.breakStart ?? '',
-            breakEnd: horario.breakEnd ?? '',
-          },
-        });
-      } else {
-        await this.prisma.horario.create({
-          data: {
-            funcionarioId: id,
-            diaSemana: horario.diaSemana,
-            startTime: horario.startTime,
-            endTime: horario.endTime,
-            breakStart: horario.breakStart ?? '',
-            breakEnd: horario.breakEnd ?? '',
-          },
-        });
-      }
-    }
-  }
-
-  async findHorariosFuncionario(id: number, headers: Headers) {
-    await this.isAdminOrFuncionario(headers);
-    const horarios = await this.prisma.horario.findMany({
-      where: {
-        funcionarioId: id,
-      },
-    });
-
-    return {
-      message: 'Horários encontrados',
-      data: horarios,
-    };
-  }
-
-  async findHorariosByFuncionario(
-    id: number,
-    horarioId: number,
-    headers: Headers,
-  ) {
-    await this.isAdminOrFuncionario(headers);
-    const horarioByFuncionario = await this.prisma.horario.findMany({
-      where: {
-        funcionarioId: id,
-        id: horarioId,
-      },
-    });
-
-    return horarioByFuncionario;
-  }
-
-  async updateHorario(
-    idFuncionario: number,
-    updateFuncionarioDto: UpdateFuncionarioDto,
-  ) {
-    for (const horario of updateFuncionarioDto.horarios as HorarioDto[]) {
-      const existingHorario = await this.prisma.horario.findFirst({
-        where: {
-          funcionarioId: idFuncionario,
-          diaSemana: horario.diaSemana,
-        },
-      });
-
-      if (existingHorario) {
-        // Atualizar horário existente
-        await this.prisma.horario.update({
-          where: {
-            id: existingHorario.id,
-          },
-          data: {
-            startTime: horario.startTime,
-            endTime: horario.endTime,
-            breakStart: horario.breakStart ?? '',
-            breakEnd: horario.breakEnd ?? '',
-          },
-        });
-      } else {
-        // Adicionar novo horário
-        await this.prisma.horario.create({
-          data: {
-            funcionarioId: idFuncionario,
-            diaSemana: horario.diaSemana,
-            startTime: horario.startTime,
-            endTime: horario.endTime,
-            breakStart: horario.breakStart ?? '',
-            breakEnd: horario.breakEnd ?? '',
-          },
-        });
-      }
-    }
-
-    const updatedHorarios = await this.prisma.horario.findMany({
-      where: {
-        funcionarioId: idFuncionario,
-      },
-    });
-
-    return {
-      message: 'Horários atualizados com sucesso',
-      data: updatedHorarios,
-    };
-  }
-
-  async updateHorarioById(
+  async updateHorarioIdFuncionarioById(
     funcionarioId: number,
     horarioId: number,
     updateHorarioDto: HorarioDto,
@@ -249,10 +170,52 @@ export class FuncionarioService {
     return { message: 'This action updates a horario', data: horario };
   }
 
-  async remove(id: number, adminEmail: string, headers: Headers) {
+  async remove(id: number, headers: Headers) {
+    await this.isAdmin(headers);
+
+    return {
+      message: `This action removes funcionario #${id}!`,
+      data: [],
+    };
+  }
+
+  async removeHorarioByID(id: number, headers: Headers, horarioId: number) {
     await this.isAdminOrFuncionario(headers);
 
-    return `This action removes a #${id} funcionario`;
+    return {
+      message: `This action removes horario #${horarioId} at funcionario #${id}!`,
+      data: [],
+    };
+  }
+
+  private async updateHorarios(id: number, horarios: HorarioDto[]) {
+    for (const horario of horarios) {
+      if (horario.id) {
+        await this.prisma.horario.update({
+          where: {
+            id: horario.id,
+          },
+          data: {
+            diaSemana: horario.diaSemana,
+            startTime: horario.startTime,
+            endTime: horario.endTime,
+            breakStart: horario.breakStart ?? '',
+            breakEnd: horario.breakEnd ?? '',
+          },
+        });
+      } else {
+        await this.prisma.horario.create({
+          data: {
+            funcionarioId: id,
+            diaSemana: horario.diaSemana,
+            startTime: horario.startTime,
+            endTime: horario.endTime,
+            breakStart: horario.breakStart ?? '',
+            breakEnd: horario.breakEnd ?? '',
+          },
+        });
+      }
+    }
   }
 
   private async isAdminOrFuncionario(headers: Headers) {

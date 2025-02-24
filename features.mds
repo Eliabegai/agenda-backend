@@ -11,6 +11,7 @@ Funções da Agenda
     [] Funcionario e Admin Pode bloquear/debloquear a agenda nos dias específicos
     [] Funcionario e Admin pode alterar o status do agendamento (Emitido, Reagendado, Reagendar)
     [x] Cada funcionário tem sua própria agenda
+    [x] Funcionario e Admin pode criar, modificar os horarios da agenda
     []
 --
 [] Horario

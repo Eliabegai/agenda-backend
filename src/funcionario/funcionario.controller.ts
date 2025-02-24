@@ -17,7 +17,7 @@ export class FuncionarioController {
   constructor(private readonly funcionarioService: FuncionarioService) {}
 
   @Post()
-  create(
+  createFuncionario(
     @Body() createFuncionarioDto: CreateFuncionarioDto,
     @Headers() headers: Headers,
   ) {
@@ -37,48 +37,48 @@ export class FuncionarioController {
     return this.funcionarioService.findOne(+id, headers);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateFuncionarioDto: UpdateFuncionarioDto,
-    @Headers() headers: Headers,
-  ) {
-    return this.funcionarioService.updateFuncionario(
-      +id,
-      updateFuncionarioDto,
-      headers,
-    );
-  }
-
   @Get(':id/horario')
-  findHorariosFuncionario(
+  findHorariosFuncionarioById(
     @Param('id') id: string,
     @Headers() headers: Headers,
   ) {
-    return this.funcionarioService.findHorariosFuncionario(+id, headers);
+    return this.funcionarioService.findHorariosFuncionarioById(+id, headers);
   }
 
   @Get(':id/horario/:horarioId')
-  findHorariosByFuncionario(
+  findHorariosIdByFuncionario(
     @Param('id') id: string,
     @Param('horarioId') horarioId: string,
     @Headers() headers: Headers,
   ) {
-    return this.funcionarioService.findHorariosByFuncionario(
+    return this.funcionarioService.findHorariosIdByFuncionario(
       +id,
       +horarioId,
       headers,
     );
   }
 
+  @Patch(':id')
+  updateFuncionarioById(
+    @Param('id') id: string,
+    @Body() updateFuncionarioDto: UpdateFuncionarioDto,
+    @Headers() headers: Headers,
+  ) {
+    return this.funcionarioService.updateFuncionarioById(
+      +id,
+      updateFuncionarioDto,
+      headers,
+    );
+  }
+
   @Patch(':id/horario/:horarioId')
-  updateHorario(
+  updateHorarioIdFuncionarioById(
     @Param('id') idFuncionario: string,
     @Param('horarioId') horarioId: string,
     @Body() updateHorarioDto: HorarioDto,
     @Headers() headers: Headers,
   ) {
-    return this.funcionarioService.updateHorarioById(
+    return this.funcionarioService.updateHorarioIdFuncionarioById(
       +idFuncionario,
       +horarioId,
       updateHorarioDto,
@@ -87,15 +87,16 @@ export class FuncionarioController {
   }
 
   @Delete(':id')
-  remove(
+  remove(@Param('id') id: string, @Headers() headers: Headers) {
+    return this.funcionarioService.remove(+id, headers);
+  }
+
+  @Delete(':id/horario/:horarioId')
+  removeHorarioByID(
     @Param('id') id: string,
-    @Body() createFuncionarioDto: CreateFuncionarioDto,
+    @Param('horarioId') horarioId: string,
     @Headers() headers: Headers,
   ) {
-    return this.funcionarioService.remove(
-      +id,
-      createFuncionarioDto.adminEmail,
-      headers,
-    );
+    return this.funcionarioService.removeHorarioByID(+id, headers, +horarioId);
   }
 }
