@@ -16,22 +16,23 @@ export class AgendamentoService {
     private readonly protocoloService: ProtocoloService,
   ) {}
 
-  async create(createAgendamentoDto: CreateAgendamentoDto, headers: Headers) {
-    await this.isAdmin(headers);
-
-    const { funcionarioId, Cliente, dataHora } = createAgendamentoDto;
-    const validadeHorarioFuncionario = await this.prisma.agendamento.findFirst({
+  async create(createAgendamentoDto: CreateAgendamentoDto) {
+    const { Cliente, dataHora } = createAgendamentoDto;
+    const funcionarioDisponivel = await this.prisma.funcionario.findFirst({
       where: {
-        dataHora: dataHora,
-        funcionarioId: funcionarioId,
+        agendamentos: {
+          none: { dataHora: createAgendamentoDto.dataHora },
+        },
       },
     });
 
-    if (validadeHorarioFuncionario)
+    if (!funcionarioDisponivel)
       return new HttpException(
-        'Funcionario não tem essa data disponível',
+        'Não tem funcionario disponível nessa data!',
         HttpStatus.CONFLICT,
       );
+
+    const funcionarioId = funcionarioDisponivel.id;
 
     try {
       const existingAgendamentoByHoraAndProtocolo =
@@ -43,6 +44,7 @@ export class AgendamentoService {
             },
           },
         });
+
       if (!existingAgendamentoByHoraAndProtocolo) {
         const existingCliente =
           await this.clienteService.createOrReturnCliente(Cliente);
@@ -52,8 +54,6 @@ export class AgendamentoService {
             Cliente.protocolo,
             existingCliente?.id,
           );
-
-        console.log(existingCliente.id, existingProtocolo.id);
 
         const agendamento = await this.prisma.agendamento.create({
           data: {
@@ -67,14 +67,13 @@ export class AgendamentoService {
         });
 
         return agendamento;
-      } else {
-        return {
-          message: 'Já existe um agendamento nessa data e protocolo!',
-          data: existingAgendamentoByHoraAndProtocolo,
-        };
       }
+
+      return {
+        message: 'Já existe um agendamento nessa data e protocolo!',
+        data: existingAgendamentoByHoraAndProtocolo,
+      };
     } catch (error) {
-      console.error(error);
       throw new HttpException(
         {
           status: HttpStatus.FORBIDDEN,
@@ -92,16 +91,39 @@ export class AgendamentoService {
     await this.isAdmin(headers);
 
     const agendamentos = await this.prisma.agendamento.findMany({});
-    return {
-      message: `This action returns all agendamento`,
-      data: agendamentos,
-    };
+    return agendamentos;
   }
 
   async findOne(id: number, headers: Headers) {
     await this.isAdminOrFuncionario(headers);
+    const agendamentoById = await this.prisma.agendamento.findFirst({
+      where: {
+        id,
+      },
+    });
 
-    return `This action returns a #${id} agendamento`;
+    return agendamentoById;
+  }
+
+  async findAgendamentoByRangeTime(start: string, end: string) {
+    const startDate = new Date(start);
+    const endDate = end ? new Date(end) : new Date();
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new HttpException(
+        'Formato de data inválido. Use "YYYY-MM-DDTHH:mm:ss.sssZ".',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const rangeAgendamento = await this.prisma.agendamento.findMany({
+      where: {
+        dataHora: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+    return rangeAgendamento;
   }
 
   async update(

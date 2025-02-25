@@ -7,6 +7,9 @@ import {
   Param,
   Delete,
   Headers,
+  Query,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { AgendamentoService } from './agendamento.service';
 import { CreateAgendamentoDto } from './dto/create-agendamento.dto';
@@ -17,16 +20,27 @@ export class AgendamentoController {
   constructor(private readonly agendamentoService: AgendamentoService) {}
 
   @Post()
-  create(
-    @Body() createAgendamentoDto: CreateAgendamentoDto,
-    @Headers() headers: Headers,
-  ) {
-    return this.agendamentoService.create(createAgendamentoDto, headers);
+  create(@Body() createAgendamentoDto: CreateAgendamentoDto) {
+    return this.agendamentoService.create(createAgendamentoDto);
   }
 
   @Get()
   findAll(@Headers() headers: Headers) {
     return this.agendamentoService.findAll(headers);
+  }
+
+  @Get('filter')
+  findAgendamentoByRangeTime(
+    @Query('start') start: string,
+    @Query('end') end: string,
+  ) {
+    if (!start) {
+      return new HttpException(
+        'Os parâmetros "start" são obrigatórios.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.agendamentoService.findAgendamentoByRangeTime(start, end);
   }
 
   @Get(':id')

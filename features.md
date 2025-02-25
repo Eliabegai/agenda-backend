@@ -20,11 +20,12 @@ Funções da Agenda
     []
 ---
 [] Agenda
-    [] Qualquer um pode agendar um horário
+    [x] Qualquer um pode agendar um horário
     [] Possibilidade de alterar o funcionario do agendamento
     [] (Funcionalidade Futura) Horario Configurável
-    [] Na hora e data selecionada, se não tiver funcionário disponível, desabilitar a função de agendar horario
+    [x] Na hora e data selecionada, se não tiver funcionário disponível, desabilitar a função de agendar horario
     [] Disparar mensagem do agendamento para os responsáveis (emails separado ou no whatsapp separado também)
+    [x] Filtrar horario pela data, horario
     []
 
 ---
@@ -34,7 +35,7 @@ Funções da Agenda
     []
 ---
 [] agendamento
-    [] Criar agendamento
+    [x] Criar agendamento
     [] Editar, remover apenas admin ou funcionario
     [] Editar campo de status (Emitido, Reagendado, Reagendar)
     [] Possibilidade de alterar o funcionário dessa reunião
