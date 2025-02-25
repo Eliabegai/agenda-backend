@@ -12,9 +12,6 @@ export enum StatusAgendamento {
 }
 export class CreateAgendamentoDto {
   @IsInt()
-  funcionarioId: number;
-
-  @IsInt()
   protocoloId: number;
 
   @IsDateString()

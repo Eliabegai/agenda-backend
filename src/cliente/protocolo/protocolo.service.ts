@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -20,15 +20,25 @@ export class ProtocoloService {
       },
     });
 
-    if (!existingProtocolo) {
-      const protocolo = await this.prisma.protocolo.create({
-        data: {
-          codigo: codigo,
-          clienteId: clienteId,
-        },
-      });
+    try {
+      if (!existingProtocolo) {
+        const protocolo = await this.prisma.protocolo.create({
+          data: {
+            codigo: codigo,
+            clienteId: clienteId,
+          },
+        });
 
-      return protocolo;
+        return protocolo;
+      }
+    } catch (error) {
+      throw new HttpException(
+        'Erro ao cadastrar protocolo',
+        HttpStatus.BAD_REQUEST,
+        {
+          cause: error,
+        },
+      );
     }
     return existingProtocolo;
   }
