@@ -1,16 +1,16 @@
 {
-  "singleQuote": true,
-  "trailingComma": "all",
   "prettier/prettier": [
     "error",
     {
+      "trailingComma": "all",
       "singleQuote": true,
       "parser": "flow",
       "usePrettierrc": false,
       "fileInfoOptions": {
-        "withNodeModules": true
+        "withNodeModules": false
       },
-      "endOfLine": "lf"
+      "endOfLine": "lf",
+      "printWidth": 200
     }
   ]
 }

@@ -21,13 +21,15 @@ export class FuncionarioService {
         nome: createFuncionarioDto.nome,
         email: createFuncionarioDto.email,
         horarios: {
-          create: createFuncionarioDto.horarios?.map((horario: HorarioDto) => ({
-            diaSemana: horario.diaSemana,
-            startTime: horario.startTime,
-            endTime: horario.endTime,
-            breakStart: horario.breakStart ?? '',
-            breakEnd: horario.breakEnd ?? '',
-          })),
+          create: createFuncionarioDto.horarios?.map((horario: HorarioDto) => {
+            return {
+              diaSemana: horario.diaSemana,
+              startTime: horario.startTime,
+              endTime: horario.endTime,
+              breakStart: horario.breakStart ?? '',
+              breakEnd: horario.breakEnd ?? '',
+            };
+          }),
         },
       },
     });
@@ -64,6 +66,7 @@ export class FuncionarioService {
         id,
       },
       include: {
+        agendamentos: true,
         horarios: true,
       },
     });

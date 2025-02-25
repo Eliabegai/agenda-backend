@@ -55,7 +55,7 @@ model Cliente {
   id           Int         @id @default(autoincrement())
   nome         String
   telefone     String
-  email        String
+  email        String      @unique
   criadoEm     DateTime    @default(now())
   atualizadoEm DateTime    @updatedAt
   protocolos   Protocolo[]
@@ -65,10 +65,8 @@ model Protocolo {
   id           Int           @id @default(autoincrement())
   cliente      Cliente       @relation(fields: [clienteId], references: [id])
   clienteId    Int
-  codigo       String
+  codigo       String        @unique
   agendamentos Agendamento[]
-
-  @@unique([clienteId, codigo]) // Garantindo que um cliente não tenha protocolos duplicados
 }
 
 model Indisponibilidade {
@@ -88,4 +86,7 @@ enum StatusAgendamento {
   CANCELADO
   NAO_COMPARECEU
   ENCERRADO
+  EMITIDO
+  REAGENDADO
+  REAGENDAR
 }
