@@ -2,12 +2,12 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminDto } from './dto/update-admin.dto';
-import { PrismaService } from 'src/prisma.service';
-import { validateOrReject } from 'class-validator';
-import * as bcrypt from 'bcryptjs';
+} from "@nestjs/common";
+import { CreateAdminDto } from "./dto/create-admin.dto";
+import { UpdateAdminDto } from "./dto/update-admin.dto";
+import { PrismaService } from "src/prisma.service";
+import { validateOrReject } from "class-validator";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class AdminService {
@@ -23,7 +23,7 @@ export class AdminService {
     });
 
     if (existingAdmin) {
-      throw new ConflictException('Administrador com este email já existe');
+      throw new ConflictException("Administrador com este email já existe");
     }
 
     const hashedPassword = await bcrypt.hash(createAdminDto.senha, 10);
@@ -49,7 +49,7 @@ export class AdminService {
     });
 
     if (!existingAdmin) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException("Usuário não encontrado");
     }
 
     const userById = this.prisma.admin.findUnique({
@@ -68,7 +68,7 @@ export class AdminService {
     });
 
     if (!existingAdmin) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException("Usuário não encontrado");
     }
 
     await validateOrReject(updateAdminDto);
@@ -92,7 +92,7 @@ export class AdminService {
     });
 
     if (!existingAdmin) {
-      throw new NotFoundException('Usuário não encontrado');
+      throw new NotFoundException("Usuário não encontrado");
     }
 
     await this.prisma.admin.delete({
@@ -102,7 +102,7 @@ export class AdminService {
     });
 
     return {
-      message: 'Usuário deletado com sucesso!',
+      message: "Usuário deletado com sucesso!",
     };
   }
 }

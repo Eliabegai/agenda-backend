@@ -34,8 +34,7 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-return": "off",
       "@typescript-eslint/no-unsafe-call": "off",
-      "prettier/prettier": "warn",
-      "arrow-body-style": ["error", "always"]
+      "arrow-body-style": ["error", "always"],
     },
   },
 );

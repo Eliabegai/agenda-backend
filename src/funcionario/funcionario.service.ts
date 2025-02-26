@@ -1,8 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateFuncionarioDto, HorarioDto } from './dto/create-funcionario.dto';
-import { UpdateFuncionarioDto } from './dto/update-funcionario.dto';
-import { PrismaService } from 'src/prisma.service';
-import { validateOrReject } from 'class-validator';
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { CreateFuncionarioDto, HorarioDto } from "./dto/create-funcionario.dto";
+import { UpdateFuncionarioDto } from "./dto/update-funcionario.dto";
+import { PrismaService } from "src/prisma.service";
+import { validateOrReject } from "class-validator";
 
 @Injectable()
 export class FuncionarioService {
@@ -26,15 +26,15 @@ export class FuncionarioService {
               diaSemana: horario.diaSemana,
               startTime: horario.startTime,
               endTime: horario.endTime,
-              breakStart: horario.breakStart ?? '',
-              breakEnd: horario.breakEnd ?? '',
+              breakStart: horario.breakStart ?? "",
+              breakEnd: horario.breakEnd ?? "",
             };
           }),
         },
       },
     });
     return {
-      message: 'Funcionário criado com sucesso',
+      message: "Funcionário criado com sucesso",
       data: funcionario,
     };
   }
@@ -46,14 +46,14 @@ export class FuncionarioService {
       include: {
         horarios: {
           orderBy: {
-            diaSemana: 'asc',
+            diaSemana: "asc",
           },
         },
       },
     });
 
     return {
-      message: 'Funcionário criado com sucesso',
+      message: "Funcionário criado com sucesso",
       data: funcionario,
     };
   }
@@ -72,7 +72,7 @@ export class FuncionarioService {
     });
 
     return {
-      message: 'Funcionário encontrado com sucesso',
+      message: "Funcionário encontrado com sucesso",
       data: funcionario,
     };
   }
@@ -84,12 +84,12 @@ export class FuncionarioService {
         funcionarioId: id,
       },
       orderBy: {
-        diaSemana: 'asc',
+        diaSemana: "asc",
       },
     });
 
     return {
-      message: 'Horários encontrados',
+      message: "Horários encontrados",
       data: horarios,
     };
   }
@@ -106,7 +106,7 @@ export class FuncionarioService {
         id: horarioId,
       },
       orderBy: {
-        diaSemana: 'asc',
+        diaSemana: "asc",
       },
     });
 
@@ -140,7 +140,7 @@ export class FuncionarioService {
     });
 
     return {
-      message: 'Funcionário atualizado com sucesso',
+      message: "Funcionário atualizado com sucesso",
       data: funcionario,
     };
   }
@@ -160,7 +160,7 @@ export class FuncionarioService {
     });
 
     if (!isExisting)
-      throw new HttpException('Horario não existe.', HttpStatus.NOT_FOUND);
+      throw new HttpException("Horario não existe.", HttpStatus.NOT_FOUND);
 
     const horario = await this.prisma.horario.update({
       where: {
@@ -170,7 +170,7 @@ export class FuncionarioService {
       data: updateHorarioDto,
     });
 
-    return { message: 'This action updates a horario', data: horario };
+    return { message: "This action updates a horario", data: horario };
   }
 
   async remove(id: number, headers: Headers) {
@@ -202,8 +202,8 @@ export class FuncionarioService {
             diaSemana: horario.diaSemana,
             startTime: horario.startTime,
             endTime: horario.endTime,
-            breakStart: horario.breakStart ?? '',
-            breakEnd: horario.breakEnd ?? '',
+            breakStart: horario.breakStart ?? "",
+            breakEnd: horario.breakEnd ?? "",
           },
         });
       } else {
@@ -213,8 +213,8 @@ export class FuncionarioService {
             diaSemana: horario.diaSemana,
             startTime: horario.startTime,
             endTime: horario.endTime,
-            breakStart: horario.breakStart ?? '',
-            breakEnd: horario.breakEnd ?? '',
+            breakStart: horario.breakStart ?? "",
+            breakEnd: horario.breakEnd ?? "",
           },
         });
       }
@@ -222,11 +222,11 @@ export class FuncionarioService {
   }
 
   private async isAdminOrFuncionario(headers: Headers) {
-    const adminEmail = headers['admin'] || '';
-    const funcionarioEmail = headers['funcionario'] || '';
+    const adminEmail = headers["admin"] || "";
+    const funcionarioEmail = headers["funcionario"] || "";
 
     if (!adminEmail && !funcionarioEmail)
-      throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
+      throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
 
     const isAdmin = await this.prisma.admin.findUnique({
       where: {
@@ -241,14 +241,14 @@ export class FuncionarioService {
     });
 
     if (!isAdmin && !isFuncionario)
-      throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
+      throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
   }
 
   private async isAdmin(headers: Headers) {
-    const adminEmail = headers['admin'] || '';
+    const adminEmail = headers["admin"] || "";
 
     if (!adminEmail)
-      throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
+      throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
 
     const isAdmin = await this.prisma.admin.findUnique({
       where: {
@@ -256,6 +256,6 @@ export class FuncionarioService {
       },
     });
 
-    if (!isAdmin) throw new HttpException('Sem Permissão!', HttpStatus.LOCKED);
+    if (!isAdmin) throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
   }
 }

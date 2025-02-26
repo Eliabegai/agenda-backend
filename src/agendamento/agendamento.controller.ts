@@ -10,12 +10,12 @@ import {
   Query,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';
-import { AgendamentoService } from './agendamento.service';
-import { CreateAgendamentoDto } from './dto/create-agendamento.dto';
-import { UpdateAgendamentoDto } from './dto/update-agendamento.dto';
+} from "@nestjs/common";
+import { AgendamentoService } from "./agendamento.service";
+import { CreateAgendamentoDto } from "./dto/create-agendamento.dto";
+import { UpdateAgendamentoDto } from "./dto/update-agendamento.dto";
 
-@Controller('agendamento')
+@Controller("agendamento")
 export class AgendamentoController {
   constructor(private readonly agendamentoService: AgendamentoService) {}
 
@@ -29,10 +29,10 @@ export class AgendamentoController {
     return this.agendamentoService.findAll(headers);
   }
 
-  @Get('filter')
+  @Get("filter")
   findAgendamentoByRangeTime(
-    @Query('start') start: string,
-    @Query('end') end: string,
+    @Query("start") start: string,
+    @Query("end") end: string,
   ) {
     if (!start) {
       return new HttpException(
@@ -43,22 +43,39 @@ export class AgendamentoController {
     return this.agendamentoService.findAgendamentoByRangeTime(start, end);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string, @Headers() headers: Headers) {
+  @Get(":id")
+  findOne(@Param("id") id: string, @Headers() headers: Headers) {
     return this.agendamentoService.findOne(+id, headers);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @Patch(":id/func")
+  updateFuncionario(
+    @Param("id") id: string,
     @Body() updateAgendamentoDto: UpdateAgendamentoDto,
     @Headers() headers: Headers,
   ) {
-    return this.agendamentoService.update(+id, updateAgendamentoDto, headers);
+    return this.agendamentoService.updateFuncionarioAgendamento(
+      +id,
+      updateAgendamentoDto,
+      headers,
+    );
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string, @Headers() headers: Headers) {
+  @Patch(":id/date")
+  updateDate(
+    @Param("id") id: string,
+    @Body() updateAgendamentoDto: UpdateAgendamentoDto,
+    @Headers() headers: Headers,
+  ) {
+    return this.agendamentoService.updateDateAgendamento(
+      +id,
+      updateAgendamentoDto,
+      headers,
+    );
+  }
+
+  @Delete(":id")
+  remove(@Param("id") id: string, @Headers() headers: Headers) {
     return this.agendamentoService.remove(+id, headers);
   }
 }

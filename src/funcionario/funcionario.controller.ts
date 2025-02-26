@@ -7,12 +7,12 @@ import {
   Param,
   Delete,
   Headers,
-} from '@nestjs/common';
-import { FuncionarioService } from './funcionario.service';
-import { CreateFuncionarioDto, HorarioDto } from './dto/create-funcionario.dto';
-import { UpdateFuncionarioDto } from './dto/update-funcionario.dto';
+} from "@nestjs/common";
+import { FuncionarioService } from "./funcionario.service";
+import { CreateFuncionarioDto, HorarioDto } from "./dto/create-funcionario.dto";
+import { UpdateFuncionarioDto } from "./dto/update-funcionario.dto";
 
-@Controller('funcionario')
+@Controller("funcionario")
 export class FuncionarioController {
   constructor(private readonly funcionarioService: FuncionarioService) {}
 
@@ -32,23 +32,23 @@ export class FuncionarioController {
     return this.funcionarioService.findAll(headers);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string, @Headers() headers: Headers) {
+  @Get(":id")
+  findOne(@Param("id") id: string, @Headers() headers: Headers) {
     return this.funcionarioService.findOne(+id, headers);
   }
 
-  @Get(':id/horario')
+  @Get(":id/horario")
   findHorariosFuncionarioById(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @Headers() headers: Headers,
   ) {
     return this.funcionarioService.findHorariosFuncionarioById(+id, headers);
   }
 
-  @Get(':id/horario/:horarioId')
+  @Get(":id/horario/:horarioId")
   findHorariosIdByFuncionario(
-    @Param('id') id: string,
-    @Param('horarioId') horarioId: string,
+    @Param("id") id: string,
+    @Param("horarioId") horarioId: string,
     @Headers() headers: Headers,
   ) {
     return this.funcionarioService.findHorariosIdByFuncionario(
@@ -58,9 +58,9 @@ export class FuncionarioController {
     );
   }
 
-  @Patch(':id')
+  @Patch(":id")
   updateFuncionarioById(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @Body() updateFuncionarioDto: UpdateFuncionarioDto,
     @Headers() headers: Headers,
   ) {
@@ -71,10 +71,10 @@ export class FuncionarioController {
     );
   }
 
-  @Patch(':id/horario/:horarioId')
+  @Patch(":id/horario/:horarioId")
   updateHorarioIdFuncionarioById(
-    @Param('id') idFuncionario: string,
-    @Param('horarioId') horarioId: string,
+    @Param("id") idFuncionario: string,
+    @Param("horarioId") horarioId: string,
     @Body() updateHorarioDto: HorarioDto,
     @Headers() headers: Headers,
   ) {
@@ -86,15 +86,15 @@ export class FuncionarioController {
     );
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string, @Headers() headers: Headers) {
+  @Delete(":id")
+  remove(@Param("id") id: string, @Headers() headers: Headers) {
     return this.funcionarioService.remove(+id, headers);
   }
 
-  @Delete(':id/horario/:horarioId')
+  @Delete(":id/horario/:horarioId")
   removeHorarioByID(
-    @Param('id') id: string,
-    @Param('horarioId') horarioId: string,
+    @Param("id") id: string,
+    @Param("horarioId") horarioId: string,
     @Headers() headers: Headers,
   ) {
     return this.funcionarioService.removeHorarioByID(+id, headers, +horarioId);

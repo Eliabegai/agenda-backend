@@ -5,7 +5,7 @@
 
 > **[ BUG ]** - 
 
-> **[ PEN ]** - 
+> **[ PEN ]** - O mesmo cliente pode agendar com protocolos diferentes, no mesmo dia e hora
 
 > **[ BUG ]** - 
 

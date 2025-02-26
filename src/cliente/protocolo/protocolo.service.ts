@@ -1,5 +1,5 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 export class ProtocoloService {
@@ -7,7 +7,7 @@ export class ProtocoloService {
   async findAll() {
     const protocolos = await this.prisma.protocolo.findMany({});
     return {
-      message: 'Returns protocolos',
+      message: "Returns protocolos",
       data: protocolos,
     };
   }
@@ -33,7 +33,7 @@ export class ProtocoloService {
       }
     } catch (error) {
       throw new HttpException(
-        'Erro ao cadastrar protocolo',
+        "Erro ao cadastrar protocolo",
         HttpStatus.BAD_REQUEST,
         {
           cause: error,

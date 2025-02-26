@@ -1,7 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
-import { ProtocoloService } from './protocolo.service';
+import { Controller, Get } from "@nestjs/common";
+import { ProtocoloService } from "./protocolo.service";
 
-@Controller('protocolo')
+@Controller("protocolo")
 export class ProtocoloController {
   constructor(private readonly protocoloService: ProtocoloService) {}
 
