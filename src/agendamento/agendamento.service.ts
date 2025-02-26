@@ -236,7 +236,6 @@ export class AgendamentoService {
   ) {
     await this.isAdmin(headers);
     const novaDataMarcada = updateAgendamentoDto.dataHora;
-    console.log(novaDataMarcada);
 
     if (!novaDataMarcada) {
       throw new HttpException("DataHora is required", HttpStatus.BAD_REQUEST);
@@ -249,8 +248,6 @@ export class AgendamentoService {
       },
     });
 
-    console.log("agendamentoMarcado", agendamentoMarcado);
-
     if (!agendamentoMarcado || !novaDataMarcada) return;
     // verificar se funcionario está disponivel
 
@@ -258,8 +255,6 @@ export class AgendamentoService {
       agendamentoMarcado?.funcionarioId,
       new Date(novaDataMarcada),
     );
-
-    console.log("funcionarioDisponivelnovadata", funcionarioDisponivel);
     let novoFuncionario;
 
     const diaDaSemana = new Date(novaDataMarcada).getDay();
@@ -282,20 +277,11 @@ export class AgendamentoService {
         },
       });
 
-      console.log("novoFuncionario", novoFuncionario);
-
       if (!novoFuncionario)
         return new HttpException(
           "Não tem funcionario disponível nessa data!",
           HttpStatus.CONFLICT,
         );
-      console.log(
-        "funcionarioDisponivelnovadata2",
-        await this.isFuncionarioDisponivel(
-          novoFuncionario?.id as number,
-          new Date(novaDataMarcada),
-        ),
-      );
     }
 
     try {
@@ -325,9 +311,26 @@ export class AgendamentoService {
     }
   }
 
-  async remove(id: number, headers: Headers) {
+  async removeAgendamento(id: number, headers: Headers) {
     await this.isAdminOrFuncionario(headers);
-    return `This action removes a #${id} agendamento`;
+
+    const agendamento = await this.prisma.agendamento.findFirst({
+      where: {
+        id,
+      },
+    });
+    if (!agendamento)
+      return new HttpException(
+        "Agendamento não encontrado!",
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const deleteAgendamento = await this.prisma.agendamento.delete({
+      where: {
+        id,
+      },
+    });
+    return deleteAgendamento;
   }
 
   private async isAdminOrFuncionario(headers: Headers) {
@@ -396,9 +399,6 @@ export class AgendamentoService {
     const diaSemana = dataHora.getDay(); //0 = Domingo, ....
     const horaAgendamento = dataHora.toTimeString().split(" ")[0]; // pegar apenas HH:mm:ss
 
-    console.log(
-      `Data: ${dataHora.toUTCString()}, Dia da Semana: ${diaSemana}, Hora do agendamento: ${horaAgendamento}`,
-    );
     // 1️⃣ Buscar horários de expediente do funcionário no dia específico
     const horario = await this.prisma.horario.findFirst({
       where: {

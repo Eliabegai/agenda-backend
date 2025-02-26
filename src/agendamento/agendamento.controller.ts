@@ -75,7 +75,7 @@ export class AgendamentoController {
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string, @Headers() headers: Headers) {
-    return this.agendamentoService.remove(+id, headers);
+  removeAgendamento(@Param("id") id: string, @Headers() headers: Headers) {
+    return this.agendamentoService.removeAgendamento(+id, headers);
   }
 }
