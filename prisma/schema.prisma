@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Admin {
-  id       Int      @id @default(autoincrement())
+  id       String   @id @default(uuid())
   nome     String
   email    String   @unique
   senha    String // Hash da senha
@@ -16,7 +16,7 @@ model Admin {
 }
 
 model Funcionario {
-  id                 Int                 @id @default(autoincrement())
+  id                 String              @id @default(uuid())
   nome               String
   email              String              @unique
   criadoEm           DateTime            @default(now())
@@ -27,9 +27,9 @@ model Funcionario {
 }
 
 model Horario {
-  id            Int         @id @default(autoincrement())
+  id            String      @id @default(uuid())
   funcionario   Funcionario @relation(fields: [funcionarioId], references: [id])
-  funcionarioId Int
+  funcionarioId String
   diaSemana     Int // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
   startTime     String // Formato HH:mm:ss
   endTime       String // Formato HH:mm:ss
@@ -38,11 +38,11 @@ model Horario {
 }
 
 model Agendamento {
-  id            Int               @id @default(autoincrement())
+  id            String            @id @default(uuid())
   funcionario   Funcionario       @relation(fields: [funcionarioId], references: [id])
-  funcionarioId Int
+  funcionarioId String
   protocolo     Protocolo         @relation(fields: [protocoloId], references: [id])
-  protocoloId   Int
+  protocoloId   String
   dataHora      DateTime
   criadoEm      DateTime          @default(now())
   atualizadoEm  DateTime          @updatedAt
@@ -52,7 +52,7 @@ model Agendamento {
 }
 
 model Cliente {
-  id           Int         @id @default(autoincrement())
+  id           String      @id @default(uuid())
   nome         String
   telefone     String
   email        String      @unique
@@ -62,17 +62,17 @@ model Cliente {
 }
 
 model Protocolo {
-  id           Int           @id @default(autoincrement())
+  id           String        @id @default(uuid())
   cliente      Cliente       @relation(fields: [clienteId], references: [id])
-  clienteId    Int
+  clienteId    String
   codigo       String        @unique
   agendamentos Agendamento[]
 }
 
 model Indisponibilidade {
-  id            Int         @id @default(autoincrement())
+  id            String      @id @default(uuid())
   funcionario   Funcionario @relation(fields: [funcionarioId], references: [id])
-  funcionarioId Int
+  funcionarioId String
   diasSemana    Int[] // Array de inteiros representando os dias afetados (0 = Domingo, ..., 6 = Sábado)
   inicio        String // Formato HH:mm:ss
   fim           String // Formato HH:mm:ss
