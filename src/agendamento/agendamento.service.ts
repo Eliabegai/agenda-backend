@@ -106,7 +106,7 @@ export class AgendamentoService {
     return agendamentos;
   }
 
-  async findOne(id: number, headers: Headers) {
+  async findOne(id: string, headers: Headers) {
     await this.isAdminOrFuncionario(headers);
     const agendamentoById = await this.prisma.agendamento.findFirst({
       where: {
@@ -139,7 +139,7 @@ export class AgendamentoService {
   }
 
   async updateFuncionarioAgendamento(
-    id: number,
+    id: string,
     updateAgendamentoDto: UpdateAgendamentoDto,
     headers: Headers,
   ) {
@@ -182,7 +182,7 @@ export class AgendamentoService {
     if (!funcionarioId) return;
 
     const disponivel = await this.isFuncionarioDisponivel(
-      +funcionarioId,
+      funcionarioId,
       agendamento.dataHora,
     );
 
@@ -230,7 +230,7 @@ export class AgendamentoService {
   }
 
   async updateDateAgendamento(
-    id: number,
+    id: string,
     updateAgendamentoDto: UpdateAgendamentoDto,
     headers: Headers,
   ) {
@@ -311,7 +311,7 @@ export class AgendamentoService {
     }
   }
 
-  async removeAgendamento(id: number, headers: Headers) {
+  async removeAgendamento(id: string, headers: Headers) {
     await this.isAdminOrFuncionario(headers);
 
     const agendamento = await this.prisma.agendamento.findFirst({
@@ -395,11 +395,11 @@ export class AgendamentoService {
     }
   }
 
-  private async isFuncionarioDisponivel(funcionarioId: number, dataHora: Date) {
+  private async isFuncionarioDisponivel(funcionarioId: string, dataHora: Date) {
     const diaSemana = dataHora.getDay(); //0 = Domingo, ....
     const horaAgendamento = dataHora.toTimeString().split(" ")[0]; // pegar apenas HH:mm:ss
 
-    // 1️⃣ Buscar horários de expediente do funcionário no dia específico
+    // Buscar horários de expediente do funcionário no dia específico
     const horario = await this.prisma.horario.findFirst({
       where: {
         funcionarioId: funcionarioId,
@@ -409,7 +409,7 @@ export class AgendamentoService {
 
     if (!horario) return false; // Funcionário não tem essa hora disponível
 
-    // 2️⃣ Verificar se o horário do agendamento está dentro do expediente
+    // Verificar se o horário do agendamento está dentro do expediente
     if (
       horaAgendamento < horario.startTime ||
       horaAgendamento >= horario.endTime
@@ -417,7 +417,7 @@ export class AgendamentoService {
       return false; // ❌ Fora do horário de expediente
     }
 
-    // 3️⃣ Verificar se o horário do agendamento está dentro do intervalo de almoço
+    // Verificar se o horário do agendamento está dentro do intervalo de almoço
     if (
       horaAgendamento >= horario.breakStart &&
       horaAgendamento < horario.breakEnd
@@ -425,10 +425,10 @@ export class AgendamentoService {
       return false; // ❌ Funcionário está em pausa
     }
 
-    // 4️⃣ Verificar se já existe um agendamento nesse horário
+    // Verificar se já existe um agendamento nesse horário
     const agendamentoExistente = await this.prisma.agendamento.findFirst({
       where: {
-        funcionarioId: +funcionarioId,
+        funcionarioId: funcionarioId,
         dataHora: dataHora,
       },
     });
@@ -437,10 +437,10 @@ export class AgendamentoService {
       return false; // ❌ Funcionário já tem um agendamento nesse horário
     }
 
-    // 5️⃣ Verificar se o funcionário está indisponível nesse horário
+    // Verificar se o funcionário está indisponível nesse horário
     const indisponivel = await this.prisma.indisponibilidade.findFirst({
       where: {
-        funcionarioId: +funcionarioId,
+        funcionarioId: funcionarioId,
         OR: [
           {
             dataInicio: { lte: dataHora }, // Indisponibilidade começa antes ou exatamente nesse horário

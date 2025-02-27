@@ -12,7 +12,7 @@ export class ProtocoloService {
     };
   }
 
-  async createOrReturnProtocolo(codigo: string, clienteId: number) {
+  async createOrReturnProtocolo(codigo: string, clienteId: string) {
     const existingProtocolo = await this.prisma.protocolo.findFirst({
       where: {
         codigo: codigo,

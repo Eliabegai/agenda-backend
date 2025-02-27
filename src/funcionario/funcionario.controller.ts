@@ -34,7 +34,7 @@ export class FuncionarioController {
 
   @Get(":id")
   findOne(@Param("id") id: string, @Headers() headers: Headers) {
-    return this.funcionarioService.findOne(+id, headers);
+    return this.funcionarioService.findOne(id, headers);
   }
 
   @Get(":id/horario")
@@ -42,7 +42,7 @@ export class FuncionarioController {
     @Param("id") id: string,
     @Headers() headers: Headers,
   ) {
-    return this.funcionarioService.findHorariosFuncionarioById(+id, headers);
+    return this.funcionarioService.findHorariosFuncionarioById(id, headers);
   }
 
   @Get(":id/horario/:horarioId")
@@ -52,8 +52,8 @@ export class FuncionarioController {
     @Headers() headers: Headers,
   ) {
     return this.funcionarioService.findHorariosIdByFuncionario(
-      +id,
-      +horarioId,
+      id,
+      horarioId,
       headers,
     );
   }
@@ -65,7 +65,7 @@ export class FuncionarioController {
     @Headers() headers: Headers,
   ) {
     return this.funcionarioService.updateFuncionarioById(
-      +id,
+      id,
       updateFuncionarioDto,
       headers,
     );
@@ -79,8 +79,8 @@ export class FuncionarioController {
     @Headers() headers: Headers,
   ) {
     return this.funcionarioService.updateHorarioIdFuncionarioById(
-      +idFuncionario,
-      +horarioId,
+      idFuncionario,
+      horarioId,
       updateHorarioDto,
       headers,
     );
@@ -88,7 +88,7 @@ export class FuncionarioController {
 
   @Delete(":id")
   remove(@Param("id") id: string, @Headers() headers: Headers) {
-    return this.funcionarioService.remove(+id, headers);
+    return this.funcionarioService.remove(id, headers);
   }
 
   @Delete(":id/horario/:horarioId")
@@ -97,6 +97,6 @@ export class FuncionarioController {
     @Param("horarioId") horarioId: string,
     @Headers() headers: Headers,
   ) {
-    return this.funcionarioService.removeHorarioByID(+id, headers, +horarioId);
+    return this.funcionarioService.removeHorarioByID(id, headers, horarioId);
   }
 }

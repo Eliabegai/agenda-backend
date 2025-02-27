@@ -72,7 +72,7 @@ export class ClienteService {
     }
   }
 
-  async createProtocoloToCliente(codigo: string, clienteId: number) {
+  async createProtocoloToCliente(codigo: string, clienteId: string) {
     return await this.protocoloService.createOrReturnProtocolo(
       codigo,
       clienteId,
@@ -88,15 +88,15 @@ export class ClienteService {
     return { message: `This action returns all cliente`, data: findCliente };
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} cliente`;
   }
 
-  update(id: number, updateClienteDto: UpdateClienteDto) {
+  update(id: string, updateClienteDto: UpdateClienteDto) {
     return `This action updates a #${id} cliente`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} cliente`;
   }
 }

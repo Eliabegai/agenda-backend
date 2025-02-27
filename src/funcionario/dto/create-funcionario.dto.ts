@@ -27,7 +27,7 @@ export class CreateFuncionarioDto {
 
 export class HorarioDto {
   @IsOptional()
-  id: number;
+  id: string;
 
   @IsNotEmpty()
   @IsInt()

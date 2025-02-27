@@ -45,7 +45,7 @@ export class AgendamentoController {
 
   @Get(":id")
   findOne(@Param("id") id: string, @Headers() headers: Headers) {
-    return this.agendamentoService.findOne(+id, headers);
+    return this.agendamentoService.findOne(id, headers);
   }
 
   @Patch(":id/func")
@@ -55,7 +55,7 @@ export class AgendamentoController {
     @Headers() headers: Headers,
   ) {
     return this.agendamentoService.updateFuncionarioAgendamento(
-      +id,
+      id,
       updateAgendamentoDto,
       headers,
     );
@@ -68,7 +68,7 @@ export class AgendamentoController {
     @Headers() headers: Headers,
   ) {
     return this.agendamentoService.updateDateAgendamento(
-      +id,
+      id,
       updateAgendamentoDto,
       headers,
     );
@@ -76,6 +76,6 @@ export class AgendamentoController {
 
   @Delete(":id")
   removeAgendamento(@Param("id") id: string, @Headers() headers: Headers) {
-    return this.agendamentoService.removeAgendamento(+id, headers);
+    return this.agendamentoService.removeAgendamento(id, headers);
   }
 }

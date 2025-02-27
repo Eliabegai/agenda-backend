@@ -58,7 +58,7 @@ export class FuncionarioService {
     };
   }
 
-  async findOne(id: number, headers: Headers) {
+  async findOne(id: string, headers: Headers) {
     await this.isAdminOrFuncionario(headers);
 
     const funcionario = await this.prisma.funcionario.findUnique({
@@ -77,7 +77,7 @@ export class FuncionarioService {
     };
   }
 
-  async findHorariosFuncionarioById(id: number, headers: Headers) {
+  async findHorariosFuncionarioById(id: string, headers: Headers) {
     await this.isAdminOrFuncionario(headers);
     const horarios = await this.prisma.horario.findMany({
       where: {
@@ -95,8 +95,8 @@ export class FuncionarioService {
   }
 
   async findHorariosIdByFuncionario(
-    id: number,
-    horarioId: number,
+    id: string,
+    horarioId: string,
     headers: Headers,
   ) {
     await this.isAdminOrFuncionario(headers);
@@ -114,7 +114,7 @@ export class FuncionarioService {
   }
 
   async updateFuncionarioById(
-    funcionarioId: number,
+    funcionarioId: string,
     updateFuncionarioDto: UpdateFuncionarioDto,
     headers: Headers,
   ) {
@@ -146,8 +146,8 @@ export class FuncionarioService {
   }
 
   async updateHorarioIdFuncionarioById(
-    funcionarioId: number,
-    horarioId: number,
+    funcionarioId: string,
+    horarioId: string,
     updateHorarioDto: HorarioDto,
     headers: Headers,
   ) {
@@ -173,7 +173,7 @@ export class FuncionarioService {
     return { message: "This action updates a horario", data: horario };
   }
 
-  async remove(id: number, headers: Headers) {
+  async remove(id: string, headers: Headers) {
     await this.isAdmin(headers);
 
     return {
@@ -182,7 +182,7 @@ export class FuncionarioService {
     };
   }
 
-  async removeHorarioByID(id: number, headers: Headers, horarioId: number) {
+  async removeHorarioByID(id: string, headers: Headers, horarioId: string) {
     await this.isAdminOrFuncionario(headers);
 
     return {
@@ -191,7 +191,7 @@ export class FuncionarioService {
     };
   }
 
-  private async updateHorarios(id: number, horarios: HorarioDto[]) {
+  private async updateHorarios(id: string, horarios: HorarioDto[]) {
     for (const horario of horarios) {
       if (horario.id) {
         await this.prisma.horario.update({

@@ -1,10 +1,4 @@
-import {
-  IsInt,
-  IsDateString,
-  IsOptional,
-  IsEnum,
-  IsString,
-} from "class-validator";
+import { IsDateString, IsOptional, IsEnum, IsString } from "class-validator";
 import { CreateClienteDto } from "src/cliente/dto/create-cliente.dto";
 
 export enum StatusAgendamento {
@@ -17,8 +11,8 @@ export enum StatusAgendamento {
   REAGENDAR,
 }
 export class CreateAgendamentoDto {
-  @IsInt()
-  protocoloId: number;
+  @IsString()
+  protocoloId: string;
 
   @IsDateString()
   dataHora: string;

@@ -41,7 +41,7 @@ export class AdminService {
     return users;
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const existingAdmin = await this.prisma.admin.findUnique({
       where: {
         id: id,
@@ -60,7 +60,7 @@ export class AdminService {
     return userById;
   }
 
-  async update(id: number, updateAdminDto: UpdateAdminDto) {
+  async update(id: string, updateAdminDto: UpdateAdminDto) {
     const existingAdmin = await this.prisma.admin.findUnique({
       where: {
         id: id,
@@ -84,7 +84,7 @@ export class AdminService {
     return updateUser;
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     const existingAdmin = await this.prisma.admin.findUnique({
       where: {
         id: id,
