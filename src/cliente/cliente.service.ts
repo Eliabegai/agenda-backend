@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { CreateClienteDto } from "./dto/create-cliente.dto";
-import { UpdateClienteDto } from "./dto/update-cliente.dto";
 import { PrismaService } from "src/prisma.service";
 import { ProtocoloService } from "./protocolo/protocolo.service";
 
@@ -10,12 +9,6 @@ export class ClienteService {
     private readonly prisma: PrismaService,
     private readonly protocoloService: ProtocoloService,
   ) {}
-
-  create(createClienteDto: CreateClienteDto) {
-    return {
-      cliente: "This action adds a new cliente",
-    };
-  }
 
   async createOrReturnCliente(createClienteDto: CreateClienteDto) {
     const existingCliente = await this.prisma.cliente.findFirst({
@@ -39,7 +32,8 @@ export class ClienteService {
     return existingCliente;
   }
 
-  async createCliente(createClienteDto: CreateClienteDto) {
+  async createCliente(createClienteDto: CreateClienteDto, headers: Headers) {
+    await this.isAdminOrFuncionario(headers);
     const existingCliente = await this.prisma.cliente.findFirst({
       where: {
         email: createClienteDto.email,
@@ -72,14 +66,20 @@ export class ClienteService {
     }
   }
 
-  async createProtocoloToCliente(codigo: string, clienteId: string) {
+  async createProtocoloToCliente(
+    codigo: string,
+    clienteId: string,
+    headers: Headers,
+  ) {
+    await this.isAdminOrFuncionario(headers);
     return await this.protocoloService.createOrReturnProtocolo(
       codigo,
       clienteId,
     );
   }
 
-  async findAll() {
+  async findAll(headers: Headers) {
+    await this.isAdminOrFuncionario(headers);
     const findCliente = await this.prisma.cliente.findMany({
       include: {
         protocolos: true,
@@ -88,15 +88,26 @@ export class ClienteService {
     return { message: `This action returns all cliente`, data: findCliente };
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} cliente`;
-  }
+  private async isAdminOrFuncionario(headers: Headers) {
+    const adminEmail = headers["admin"] || "";
+    const funcionarioEmail = headers["funcionario"] || "";
 
-  update(id: string, updateClienteDto: UpdateClienteDto) {
-    return `This action updates a #${id} cliente`;
-  }
+    if (!adminEmail && !funcionarioEmail)
+      throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
 
-  remove(id: string) {
-    return `This action removes a #${id} cliente`;
+    const isAdmin = await this.prisma.admin.findUnique({
+      where: {
+        email: adminEmail,
+      },
+    });
+
+    const isFuncionario = await this.prisma.funcionario.findUnique({
+      where: {
+        email: funcionarioEmail,
+      },
+    });
+
+    if (!isAdmin && !isFuncionario)
+      throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
   }
 }

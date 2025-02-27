@@ -360,7 +360,7 @@ export class AgendamentoService {
     const adminEmail = headers["admin"] || "";
 
     if (!adminEmail)
-      throw new HttpException("Sem Permissão!", HttpStatus.UNAUTHORIZED);
+      throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
 
     const isAdmin = await this.prisma.admin.findUnique({
       where: {
@@ -368,8 +368,7 @@ export class AgendamentoService {
       },
     });
 
-    if (!isAdmin)
-      throw new HttpException("Sem Permissão!", HttpStatus.UNAUTHORIZED);
+    if (!isAdmin) throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
   }
 
   private validateStatus(
