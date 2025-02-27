@@ -118,7 +118,7 @@ export class AgendamentoService {
         },
       },
     });
-    return agendamentos;
+    return { data: agendamentos, count: agendamentos.length };
   }
 
   async findOne(id: string, headers: Headers) {
@@ -137,7 +137,7 @@ export class AgendamentoService {
       },
     });
 
-    return agendamentoById;
+    return { data: agendamentoById, count: 1 };
   }
 
   async findAgendamentoByRangeTime(start: string, end: string) {
@@ -166,7 +166,7 @@ export class AgendamentoService {
         },
       },
     });
-    return rangeAgendamento;
+    return { data: rangeAgendamento, count: rangeAgendamento.length };
   }
 
   async updateFuncionarioAgendamento(
@@ -206,9 +206,9 @@ export class AgendamentoService {
         );
     }
 
-    const funcionarioId = updateAgendamentoDto.funcionarioId
-      ? updateAgendamentoDto.funcionarioId
-      : funcionarioDisponivel.id;
+    const funcionarioId = updateAgendamentoDto?.funcionarioId
+      ? updateAgendamentoDto?.funcionarioId
+      : funcionarioDisponivel?.id;
 
     if (!funcionarioId) return;
 
@@ -260,7 +260,7 @@ export class AgendamentoService {
       },
     });
 
-    return updateAgendamento;
+    return { data: updateAgendamento };
   }
 
   async updateDateAgendamento(
@@ -332,7 +332,7 @@ export class AgendamentoService {
         },
       });
 
-      return agendamento;
+      return { data: agendamento };
     } catch (error) {
       console.error(error);
       throw new HttpException(
@@ -367,7 +367,7 @@ export class AgendamentoService {
         id,
       },
     });
-    return deleteAgendamento;
+    return { data: deleteAgendamento };
   }
 
   private async isAdminOrFuncionario(headers: Headers) {

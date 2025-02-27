@@ -9,6 +9,18 @@
 
 > **[ PEN ]** - Criar Indisponibilidade para o funcionário, não permitindo cadastrar agendamento nesse dia
 
+> **[ PEN ]** - Não poder criar agendamento para a data/hora atual, apenas futura, ou seja, hoje sendo 27/02/2025 as 14:30, não poder marcar para esse horário (se tiver disponível) ou anterior, apenas depois.
+
+
+
+
+
+
+
+
+
 > **[ BUG ]** - 
+
+> **[ PEN ]** - 
 
 

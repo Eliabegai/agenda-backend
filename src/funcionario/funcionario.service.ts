@@ -40,13 +40,14 @@ export class FuncionarioService {
     return {
       message: "Funcionário criado com sucesso",
       data: funcionario,
+      status: HttpStatus.CREATED,
     };
   }
 
   async findAll(headers: Headers) {
     await this.isAdmin(headers);
 
-    const funcionario = await this.prisma.funcionario.findMany({
+    const funcionarios = await this.prisma.funcionario.findMany({
       include: {
         indisponibilidades: true,
         horarios: {
@@ -54,12 +55,15 @@ export class FuncionarioService {
             diaSemana: "asc",
           },
         },
+        _count: true,
       },
     });
 
     return {
-      message: "Funcionário criado com sucesso",
-      data: funcionario,
+      message: "Retornando todos funcionarios",
+      data: funcionarios,
+      count: funcionarios.length,
+      status: HttpStatus.OK,
     };
   }
 
@@ -74,12 +78,14 @@ export class FuncionarioService {
         agendamentos: true,
         indisponibilidades: true,
         horarios: true,
+        _count: true,
       },
     });
 
     return {
       message: "Funcionário encontrado com sucesso",
       data: funcionario,
+      status: HttpStatus.OK,
     };
   }
 
@@ -104,6 +110,7 @@ export class FuncionarioService {
     return {
       message: "Horários encontrados",
       data: horarios,
+      status: HttpStatus.OK,
     };
   }
 
@@ -123,7 +130,11 @@ export class FuncionarioService {
       },
     });
 
-    return horarioByFuncionario;
+    return {
+      data: horarioByFuncionario,
+      count: horarioByFuncionario.length,
+      status: HttpStatus.OK,
+    };
   }
 
   async updateFuncionarioById(
@@ -155,6 +166,7 @@ export class FuncionarioService {
     return {
       message: "Funcionário atualizado com sucesso",
       data: funcionario,
+      status: HttpStatus.OK,
     };
   }
 
@@ -183,15 +195,51 @@ export class FuncionarioService {
       data: updateHorarioDto,
     });
 
-    return { message: "This action updates a horario", data: horario };
+    return {
+      message: "Atualizado horario desse funcionario",
+      data: horario,
+      status: HttpStatus.OK,
+    };
   }
 
   async remove(id: string, headers: Headers) {
     await this.isAdmin(headers);
 
+    const deleteHorarios = this.prisma.horario.deleteMany({
+      where: {
+        funcionarioId: id,
+      },
+    });
+
+    const deleteIndisponibilidade = this.prisma.indisponibilidade.deleteMany({
+      where: {
+        funcionarioId: id,
+      },
+    });
+
+    const deleteAgendamento = this.prisma.agendamento.deleteMany({
+      where: {
+        funcionarioId: id,
+      },
+    });
+
+    const deleteFuncionario = this.prisma.funcionario.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    const transaction = await this.prisma.$transaction([
+      deleteHorarios,
+      deleteIndisponibilidade,
+      deleteAgendamento,
+      deleteFuncionario,
+    ]);
+
     return {
       message: `This action removes funcionario #${id}!`,
-      data: [],
+      data: transaction,
+      status: HttpStatus.OK,
     };
   }
 
