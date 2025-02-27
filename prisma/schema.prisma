@@ -74,7 +74,6 @@ model Indisponibilidade {
   id            String      @id @default(uuid())
   funcionario   Funcionario @relation(fields: [funcionarioId], references: [id])
   funcionarioId String
-  diasSemana    Int[] // Array de inteiros representando os dias afetados (0 = Domingo, ..., 6 = Sábado)
   inicio        String // Formato HH:mm:ss
   fim           String // Formato HH:mm:ss
   dataInicio    DateTime? // Opcional, caso queira definir um período específico

@@ -18,6 +18,12 @@ export class AgendamentoService {
 
   async create(createAgendamentoDto: CreateAgendamentoDto) {
     const { Cliente, dataHora } = createAgendamentoDto;
+
+    if (!Cliente)
+      return new HttpException(
+        "Cliente não encontrado, favor informar!",
+        HttpStatus.NOT_FOUND,
+      );
     const funcionarioDisponivel = await this.prisma.funcionario.findFirst({
       where: {
         agendamentos: {
@@ -102,7 +108,16 @@ export class AgendamentoService {
   async findAll(headers: Headers) {
     await this.isAdmin(headers);
 
-    const agendamentos = await this.prisma.agendamento.findMany({});
+    const agendamentos = await this.prisma.agendamento.findMany({
+      include: {
+        funcionario: true,
+        protocolo: {
+          include: {
+            cliente: true,
+          },
+        },
+      },
+    });
     return agendamentos;
   }
 
@@ -111,6 +126,14 @@ export class AgendamentoService {
     const agendamentoById = await this.prisma.agendamento.findFirst({
       where: {
         id,
+      },
+      include: {
+        funcionario: true,
+        protocolo: {
+          include: {
+            cliente: true,
+          },
+        },
       },
     });
 
@@ -132,6 +155,14 @@ export class AgendamentoService {
         dataHora: {
           gte: startDate,
           lte: endDate,
+        },
+      },
+      include: {
+        funcionario: true,
+        protocolo: {
+          include: {
+            cliente: true,
+          },
         },
       },
     });
@@ -224,6 +255,9 @@ export class AgendamentoService {
       data: {
         funcionarioId: funcionarioId,
       },
+      include: {
+        funcionario: true,
+      },
     });
 
     return updateAgendamento;
@@ -292,6 +326,9 @@ export class AgendamentoService {
         data: {
           dataHora: novaDataMarcada,
           funcionarioId: novoFuncionario?.id,
+        },
+        include: {
+          funcionario: true,
         },
       });
 

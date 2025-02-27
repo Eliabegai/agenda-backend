@@ -1,5 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { CreateFuncionarioDto, HorarioDto } from "./dto/create-funcionario.dto";
+import {
+  CreateFuncionarioDto,
+  HorarioDto,
+  IndisponibilidadeDto,
+} from "./dto/create-funcionario.dto";
 import { UpdateFuncionarioDto } from "./dto/update-funcionario.dto";
 import { PrismaService } from "src/prisma.service";
 import { validateOrReject } from "class-validator";
@@ -44,6 +48,7 @@ export class FuncionarioService {
 
     const funcionario = await this.prisma.funcionario.findMany({
       include: {
+        indisponibilidades: true,
         horarios: {
           orderBy: {
             diaSemana: "asc",
@@ -67,6 +72,7 @@ export class FuncionarioService {
       },
       include: {
         agendamentos: true,
+        indisponibilidades: true,
         horarios: true,
       },
     });
@@ -85,6 +91,13 @@ export class FuncionarioService {
       },
       orderBy: {
         diaSemana: "asc",
+      },
+      include: {
+        funcionario: {
+          include: {
+            indisponibilidades: true,
+          },
+        },
       },
     });
 
@@ -189,6 +202,74 @@ export class FuncionarioService {
       message: `This action removes horario #${horarioId} at funcionario #${id}!`,
       data: [],
     };
+  }
+
+  async createIndisponibilidadeFuncionario(
+    id: string,
+    indisponibilidade: IndisponibilidadeDto,
+    headers: Headers,
+  ) {
+    await this.isAdmin(headers);
+
+    const { dataInicio, dataFim } = indisponibilidade;
+    if (!dataInicio || !dataFim)
+      return new HttpException(
+        "Não definido a data de início e fim",
+        HttpStatus.BAD_REQUEST,
+      );
+    const inicio = new Date(dataInicio);
+    const fim = new Date(dataFim);
+    const horaInicio = inicio.toTimeString().split(" ")[0]; // pegar apenas HH:mm:ss
+    const horaFim = fim.toTimeString().split(" ")[0]; // pegar apenas HH:mm:ss
+
+    const funcionario = await this.prisma.funcionario.findFirst({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!funcionario)
+      return new HttpException(
+        "Funcionario não encontrado!",
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const existingIndisponibilidade =
+      await this.prisma.indisponibilidade.findFirst({
+        where: {
+          dataInicio: inicio,
+          dataFim: fim,
+        },
+      });
+    if (existingIndisponibilidade)
+      return new HttpException("Data já existe", HttpStatus.BAD_REQUEST);
+
+    try {
+      const criarIndisponibilidade = await this.prisma.indisponibilidade.create(
+        {
+          data: {
+            dataInicio: inicio,
+            dataFim: fim,
+            funcionarioId: funcionario.id,
+            inicio: horaInicio,
+            fim: horaFim,
+            motivo: indisponibilidade.motivo || "",
+          },
+        },
+      );
+
+      return criarIndisponibilidade;
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "Erro ao cadastrar Indisponibilidade",
+        },
+        HttpStatus.BAD_REQUEST,
+        { cause: error },
+      );
+    }
   }
 
   private async updateHorarios(id: string, horarios: HorarioDto[]) {

@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsDateString,
   IsEmail,
   IsInt,
   IsNotEmpty,
@@ -48,4 +49,18 @@ export class HorarioDto {
   @IsOptional()
   @IsString()
   breakEnd?: string;
+}
+
+export class IndisponibilidadeDto {
+  @IsOptional()
+  @IsDateString()
+  dataInicio?: Date;
+
+  @IsOptional()
+  @IsDateString()
+  dataFim?: Date;
+
+  @IsOptional()
+  @IsString()
+  motivo?: string;
 }

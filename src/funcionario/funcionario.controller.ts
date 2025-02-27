@@ -9,7 +9,11 @@ import {
   Headers,
 } from "@nestjs/common";
 import { FuncionarioService } from "./funcionario.service";
-import { CreateFuncionarioDto, HorarioDto } from "./dto/create-funcionario.dto";
+import {
+  CreateFuncionarioDto,
+  HorarioDto,
+  IndisponibilidadeDto,
+} from "./dto/create-funcionario.dto";
 import { UpdateFuncionarioDto } from "./dto/update-funcionario.dto";
 
 @Controller("funcionario")
@@ -23,6 +27,19 @@ export class FuncionarioController {
   ) {
     return this.funcionarioService.createFuncionario(
       createFuncionarioDto,
+      headers,
+    );
+  }
+
+  @Post(":id/indisponibilidade")
+  createIndisponibilidadeFuncionario(
+    @Param("id") id: string,
+    @Body() indisponibilidadeDto: IndisponibilidadeDto,
+    @Headers() headers: Headers,
+  ) {
+    return this.funcionarioService.createIndisponibilidadeFuncionario(
+      id,
+      indisponibilidadeDto,
       headers,
     );
   }
