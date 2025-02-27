@@ -82,6 +82,12 @@ export class FuncionarioService {
       },
     });
 
+    if (!funcionario)
+      return new HttpException(
+        "Funcionário não encontrado ou não existe!",
+        HttpStatus.BAD_REQUEST,
+      );
+
     return {
       message: "Funcionário encontrado com sucesso",
       data: funcionario,
