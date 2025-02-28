@@ -4,6 +4,8 @@ import { ClienteController } from "./cliente.controller";
 import { PrismaService } from "src/prisma.service";
 import { AgendamentoService } from "src/agendamento/agendamento.service";
 import { ProtocoloService } from "./protocolo/protocolo.service";
+import { AuthModule } from "src/auth/auth.module";
+import { JwtService } from "@nestjs/jwt";
 
 @Module({
   controllers: [ClienteController],
@@ -12,6 +14,8 @@ import { ProtocoloService } from "./protocolo/protocolo.service";
     PrismaService,
     AgendamentoService,
     ProtocoloService,
+    JwtService,
   ],
+  imports: [AuthModule],
 })
 export class ClienteModule {}
