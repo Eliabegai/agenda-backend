@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Headers,
+  UseGuards,
 } from "@nestjs/common";
 import { FuncionarioService } from "./funcionario.service";
 import {
@@ -15,7 +16,9 @@ import {
   IndisponibilidadeDto,
 } from "./dto/create-funcionario.dto";
 import { UpdateFuncionarioDto } from "./dto/update-funcionario.dto";
+import { JwtAuthGuard } from "src/auth/jtw-auth.guard";
 
+@UseGuards(JwtAuthGuard)
 @Controller("funcionario")
 export class FuncionarioController {
   constructor(private readonly funcionarioService: FuncionarioService) {}

@@ -10,10 +10,12 @@ import {
   Query,
   HttpException,
   HttpStatus,
+  UseGuards,
 } from "@nestjs/common";
 import { AgendamentoService } from "./agendamento.service";
 import { CreateAgendamentoDto } from "./dto/create-agendamento.dto";
 import { UpdateAgendamentoDto } from "./dto/update-agendamento.dto";
+import { JwtAuthGuard } from "src/auth/jtw-auth.guard";
 
 @Controller("agendamento")
 export class AgendamentoController {
@@ -24,11 +26,13 @@ export class AgendamentoController {
     return this.agendamentoService.create(createAgendamentoDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Headers() headers: Headers) {
     return this.agendamentoService.findAll(headers);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get("filter")
   findAgendamentoByRangeTime(
     @Query("start") start: string,
@@ -43,11 +47,13 @@ export class AgendamentoController {
     return this.agendamentoService.findAgendamentoByRangeTime(start, end);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(":id")
   findOne(@Param("id") id: string, @Headers() headers: Headers) {
     return this.agendamentoService.findOne(id, headers);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(":id/func")
   updateFuncionario(
     @Param("id") id: string,
@@ -61,6 +67,7 @@ export class AgendamentoController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(":id/date")
   updateDate(
     @Param("id") id: string,
@@ -74,6 +81,7 @@ export class AgendamentoController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(":id")
   removeAgendamento(@Param("id") id: string, @Headers() headers: Headers) {
     return this.agendamentoService.removeAgendamento(id, headers);

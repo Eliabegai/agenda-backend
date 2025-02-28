@@ -29,7 +29,6 @@ export class AuthService {
     const { email, senha } = user;
 
     const validUser = await this.validateUser(email, senha);
-    console.log(validUser);
 
     if (!validUser)
       return new HttpException(
