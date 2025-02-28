@@ -1,1 +1,12 @@
-DATABASE_URL="postgresql://user:password@localhost:5432/agendamentos"
+# Banco de dados local
+# DATABASE_URL="postgresql://admin:admin@localhost:5432/agendamentos"
+
+# Connect to Supabase via connection pooling with Supavisor.
+DATABASE_URL="postgres://postgres.[id]:[password]@[url_supabase]/postgres?pgbouncer=true"
+
+# Direct connection to the database. Used for migrations.
+DIRECT_URL="postgres://postgres.[id]:[password]@[url_supabase]/postgres"
+
+SECRET_JWT="UmaFraseSecretaParaToken"
+
+NODE_ENV=production node dist/main.js
