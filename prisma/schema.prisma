@@ -81,6 +81,12 @@ model Indisponibilidade {
   motivo        String?
 }
 
+model InvalidToken {
+  id       String   @id @default(uuid())
+  token    String   @unique
+  criadoEm DateTime @default(now())
+}
+
 enum StatusAgendamento {
   AGENDADO
   CANCELADO

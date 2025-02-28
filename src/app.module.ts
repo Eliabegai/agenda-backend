@@ -6,6 +6,8 @@ import { FuncionarioModule } from "./funcionario/funcionario.module";
 import { AgendamentoModule } from "./agendamento/agendamento.module";
 import { ClienteModule } from "./cliente/cliente.module";
 import { ProtocoloModule } from "./cliente/protocolo/protocolo.module";
+import { AuthModule } from "./auth/auth.module";
+import { JwtService } from "@nestjs/jwt";
 
 @Module({
   imports: [
@@ -14,8 +16,9 @@ import { ProtocoloModule } from "./cliente/protocolo/protocolo.module";
     AgendamentoModule,
     ClienteModule,
     ProtocoloModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtService],
 })
 export class AppModule {}
