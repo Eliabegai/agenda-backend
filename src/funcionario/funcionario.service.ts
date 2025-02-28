@@ -314,7 +314,6 @@ export class FuncionarioService {
 
       return criarIndisponibilidade;
     } catch (error) {
-      console.error(error);
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,

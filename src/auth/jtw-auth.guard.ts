@@ -43,7 +43,6 @@ export class JwtAuthGuard implements CanActivate {
       request.user = decoded;
       return true;
     } catch (error) {
-      console.error(error);
       throw new HttpException(
         { error: error.message },
         HttpStatus.UNAUTHORIZED,

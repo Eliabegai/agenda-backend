@@ -334,7 +334,6 @@ export class AgendamentoService {
 
       return { data: agendamento };
     } catch (error) {
-      console.error(error);
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
