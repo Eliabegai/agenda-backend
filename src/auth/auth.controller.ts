@@ -1,6 +1,7 @@
-import { Body, Controller, Headers, Post } from "@nestjs/common";
+import { Body, Controller, Headers, Post, Put, Query } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { CreateAuthDto } from "./dto/create-auth.dto";
+import { UpdateAuthDto } from "./dto/update-auth.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -15,5 +16,36 @@ export class AuthController {
   logout(@Headers() headers: Headers) {
     const token: string = headers["token"];
     return this.authService.logout(token);
+  }
+
+  @Put("update-senha")
+  alterarSenhaAdmin(
+    @Headers() headers: Headers,
+    @Body() updateSenha: UpdateAuthDto,
+  ) {
+    const email: string = headers["admin"];
+    return this.authService.alterarSenhaAdmin(updateSenha, email);
+  }
+
+  @Put("update-senha-func")
+  alterarSenhaFuncionario(
+    @Headers() headers: Headers,
+    @Body() updateSenha: UpdateAuthDto,
+  ) {
+    const email: string = headers["funcionario"];
+    return this.authService.alterarSenhaFuncionario(updateSenha, email);
+  }
+
+  @Post("reset-password")
+  async resetPassword(
+    @Body("newPassword") newPassword: string,
+    @Query("token") token: string,
+  ) {
+    return this.authService.resetPassword(token, newPassword);
+  }
+
+  @Post("forgot-password")
+  async forgotPassword(@Body("email") email: string) {
+    return this.authService.requestPasswordReset(email);
   }
 }

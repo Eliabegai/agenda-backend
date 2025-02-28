@@ -8,48 +8,53 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Admin {
-  id       String   @id @default(uuid())
-  nome     String
-  email    String   @unique
-  senha    String // Hash da senha
-  criadoEm DateTime @default(now())
+model User {
+  id                   String              @id @default(uuid())
+  nome                 String
+  email                String              @unique
+  criadoEm             DateTime            @default(now())
+  atualizadoEm         DateTime            @updatedAt
+  senha                String
+  role                 RoleUser            @default(USER)
+  passwordResetTokenId String?
+  horarios             Horario[]
+  agendamentos         Agendamento[]
+  indisponibilidades   Indisponibilidade[]
+  passwordResetToken   PasswordResetToken?
 }
 
-model Funcionario {
-  id                 String              @id @default(uuid())
-  nome               String
-  email              String              @unique
-  criadoEm           DateTime            @default(now())
-  atualizadoEm       DateTime            @updatedAt
-  horarios           Horario[]
-  agendamentos       Agendamento[]
-  indisponibilidades Indisponibilidade[]
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  userId    String   @unique
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Horario {
-  id            String      @id @default(uuid())
-  funcionario   Funcionario @relation(fields: [funcionarioId], references: [id])
-  funcionarioId String
-  diaSemana     Int // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
-  startTime     String // Formato HH:mm:ss
-  endTime       String // Formato HH:mm:ss
-  breakStart    String // Formato HH:mm:ss
-  breakEnd      String // Formato HH:mm:ss
+  id         String  @id @default(uuid())
+  diaSemana  Int // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+  startTime  String // Formato HH:mm:ss
+  endTime    String // Formato HH:mm:ss
+  breakStart String // Formato HH:mm:ss
+  breakEnd   String // Formato HH:mm:ss
+  User       User?   @relation(fields: [userId], references: [id])
+  userId     String?
 }
 
 model Agendamento {
-  id            String            @id @default(uuid())
-  funcionario   Funcionario       @relation(fields: [funcionarioId], references: [id])
-  funcionarioId String
-  protocolo     Protocolo         @relation(fields: [protocoloId], references: [id])
-  protocoloId   String
-  dataHora      DateTime
-  criadoEm      DateTime          @default(now())
-  atualizadoEm  DateTime          @updatedAt
-  status        StatusAgendamento @default(AGENDADO)
+  id           String            @id @default(uuid())
+  protocolo    Protocolo         @relation(fields: [protocoloId], references: [id])
+  protocoloId  String
+  dataHora     DateTime
+  criadoEm     DateTime          @default(now())
+  atualizadoEm DateTime          @updatedAt
+  status       StatusAgendamento @default(AGENDADO)
+  User         User?             @relation(fields: [userId], references: [id])
+  userId       String?
 
-  @@unique([funcionarioId, dataHora]) // Garantindo funcionários diferentes tenham agendamentos no mesmo horário
+  @@unique([userId, dataHora]) // Garantindo funcionários diferentes tenham agendamentos no mesmo horário
 }
 
 model Cliente {
@@ -71,14 +76,14 @@ model Protocolo {
 }
 
 model Indisponibilidade {
-  id            String      @id @default(uuid())
-  funcionario   Funcionario @relation(fields: [funcionarioId], references: [id])
-  funcionarioId String
-  inicio        String // Formato HH:mm:ss
-  fim           String // Formato HH:mm:ss
-  dataInicio    DateTime? // Opcional, caso queira definir um período específico
-  dataFim       DateTime? // Opcional, para definir até quando a regra vale
-  motivo        String?
+  id         String    @id @default(uuid())
+  inicio     String // Formato HH:mm:ss
+  fim        String // Formato HH:mm:ss
+  dataInicio DateTime? // Opcional, caso queira definir um período específico
+  dataFim    DateTime? // Opcional, para definir até quando a regra vale
+  motivo     String?
+  User       User?     @relation(fields: [userId], references: [id])
+  userId     String?
 }
 
 model InvalidToken {
@@ -95,4 +100,9 @@ enum StatusAgendamento {
   EMITIDO
   REAGENDADO
   REAGENDAR
+}
+
+enum RoleUser {
+  ADMIN
+  USER
 }

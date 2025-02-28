@@ -3,6 +3,8 @@ import { PrismaService } from "src/prisma.service";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 import { CreateAuthDto } from "./dto/create-auth.dto";
+import { UpdateAuthDto } from "./dto/update-auth.dto";
+import { randomUUID } from "crypto";
 
 @Injectable()
 export class AuthService {
@@ -54,6 +56,69 @@ export class AuthService {
     };
   }
 
+  async alterarSenhaAdmin(updateSenha: UpdateAuthDto, email: string) {
+    const { senhaAntiga, novaSenha } = updateSenha;
+
+    const usuario = await this.prisma.admin.findUnique({
+      where: { email },
+    });
+
+    if (!usuario)
+      return new HttpException(
+        "Usuário não encontrado",
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const passwordMatches = bcrypt.compareSync(senhaAntiga, usuario?.senha);
+
+    if (!passwordMatches)
+      return new HttpException("Senhas não conferem!", HttpStatus.BAD_REQUEST);
+
+    const hashedPassword = await bcrypt.hash(novaSenha, 10);
+
+    await this.prisma.admin.update({
+      where: { id: usuario.id },
+      data: { senha: hashedPassword },
+    });
+
+    return { message: "Sennha Alterada com sucesso!", status: HttpStatus.OK };
+  }
+
+  async alterarSenhaFuncionario(updateSenha: UpdateAuthDto, email: string) {
+    const { senhaAntiga, novaSenha } = updateSenha;
+
+    const usuario = await this.prisma.funcionario.findUnique({
+      where: { email },
+    });
+
+    if (!usuario)
+      return new HttpException(
+        "Usuário não encontrado",
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const passwordMatches = bcrypt.compareSync(senhaAntiga, usuario?.senha);
+
+    if (!passwordMatches)
+      return new HttpException("Senhas não conferem!", HttpStatus.BAD_REQUEST);
+
+    const hashedPassword = await bcrypt.hash(novaSenha, 10);
+
+    await this.prisma.funcionario.update({
+      where: { id: usuario.id },
+      data: { senha: hashedPassword },
+    });
+
+    return { message: "Sennha Alterada com sucesso!", status: HttpStatus.OK };
+  }
+
+  private async updateSenhaFuncionario(senha: string, id: string) {
+    return await this.prisma.funcionario.update({
+      where: { id: id },
+      data: { senha: senha },
+    });
+  }
+
   async isTokenInvalid(token: string) {
     const invalidToken = await this.prisma.invalidToken.findUnique({
       where: {
@@ -62,5 +127,58 @@ export class AuthService {
     });
 
     return !invalidToken;
+  }
+
+  async requestPasswordReset(email: string) {
+    const user = await this.prisma.funcionario.findUnique({ where: { email } });
+
+    if (!user)
+      throw new HttpException("E-mail não encontrado!", HttpStatus.BAD_REQUEST);
+
+    const token = randomUUID();
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+    const url = "http://localhost:3000";
+
+    await this.prisma.passwordResetToken.upsert({
+      where: { id: user.id },
+      update: { token, expiresAt },
+      create: { funcionarioId: user.id, token, expiresAt },
+    });
+
+    // Simulação de envio de e-mail (substituir por serviço real)
+    console.log(
+      `Envie este link para o usuário: http://localhost:3000/auth/reset-password?token=${token}`,
+    );
+
+    return {
+      message: "E-mail enviado para redefinição de senha!",
+      link: `${url}/auth/reset-password?token=${token}`,
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { token },
+    });
+
+    if (!resetToken || resetToken.expiresAt < new Date()) {
+      throw new HttpException(
+        "Token Inválido ou expirado",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.prisma.funcionario.update({
+      where: { id: resetToken.funcionarioId },
+      data: {
+        senha: hashedPassword,
+      },
+    });
+
+    await this.prisma.passwordResetToken.delete({ where: { token } });
+
+    return { message: "Senha redefinida com sucesso!" };
   }
 }
