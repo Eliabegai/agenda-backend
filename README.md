@@ -52,6 +52,19 @@ $ pnpm run test:cov
 
 ---
 
+# Criar imagem docker
+```sh
+docker build -t agenda-backend .
+```
+> * -t my-nestjs-app: Marca a imagem com o nome .my-nestjs-app
+
+> * .: Indica o diretório atual como o contexto de compilação.
+
+## Executa imagem
+```sh
+docker run -p 3000:3000 agenda-backend
+```
+
 ## Criar novo recurso completo
 
 ```sh

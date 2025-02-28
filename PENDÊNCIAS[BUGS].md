@@ -11,10 +11,11 @@
 
 > **[ PEN ]** - Não poder criar agendamento para a data/hora atual, apenas futura, ou seja, hoje sendo 27/02/2025 as 14:30, não poder marcar para esse horário (se tiver disponível) ou anterior, apenas depois.
 
-> **[ PEN ]** - Login Admin
+> **[ PEN ]** - Login Admin ou Funcionario, se não for admin, tentar funcionario... porém precisa acrescentar o campo senha
 
+> **[ PEN ]** - Função para recuperar senha e alterar senha (funcionario ou admin)
 
-
+> **[ PEN ]** - 
 
 
 
