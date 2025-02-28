@@ -95,19 +95,12 @@ export class ClienteService {
     if (!adminEmail && !funcionarioEmail)
       throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
 
-    const isAdmin = await this.prisma.admin.findUnique({
+    const isAdmin = await this.prisma.user.findUnique({
       where: {
         email: adminEmail,
       },
     });
 
-    const isFuncionario = await this.prisma.funcionario.findUnique({
-      where: {
-        email: funcionarioEmail,
-      },
-    });
-
-    if (!isAdmin && !isFuncionario)
-      throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
+    if (!isAdmin) throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
   }
 }

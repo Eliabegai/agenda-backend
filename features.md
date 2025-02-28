@@ -54,8 +54,7 @@ Funções da Agenda
 
 
 
-admin
-eliabe@email.com
-
-funcionario
-joao.silva@exemplo.com
+Host app
+fly.io
+hostgator
+aws

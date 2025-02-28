@@ -24,7 +24,7 @@ export class AgendamentoService {
         "Cliente não encontrado, favor informar!",
         HttpStatus.NOT_FOUND,
       );
-    const funcionarioDisponivel = await this.prisma.funcionario.findFirst({
+    const funcionarioDisponivel = await this.prisma.user.findFirst({
       where: {
         agendamentos: {
           none: { dataHora: createAgendamentoDto.dataHora },
@@ -76,7 +76,7 @@ export class AgendamentoService {
         const agendamento = await this.prisma.agendamento.create({
           data: {
             dataHora: dataHora,
-            funcionarioId: funcionarioId,
+            userId: funcionarioId,
             protocoloId: existingProtocolo.id,
           },
           include: {
@@ -110,7 +110,7 @@ export class AgendamentoService {
 
     const agendamentos = await this.prisma.agendamento.findMany({
       include: {
-        funcionario: true,
+        User: true,
         protocolo: {
           include: {
             cliente: true,
@@ -128,7 +128,7 @@ export class AgendamentoService {
         id,
       },
       include: {
-        funcionario: true,
+        User: true,
         protocolo: {
           include: {
             cliente: true,
@@ -158,7 +158,7 @@ export class AgendamentoService {
         },
       },
       include: {
-        funcionario: true,
+        User: true,
         protocolo: {
           include: {
             cliente: true,
@@ -190,8 +190,8 @@ export class AgendamentoService {
         HttpStatus.BAD_REQUEST,
       );
 
-    if (!updateAgendamentoDto.funcionarioId) {
-      funcionarioDisponivel = await this.prisma.funcionario.findFirst({
+    if (!updateAgendamentoDto.userId) {
+      funcionarioDisponivel = await this.prisma.user.findFirst({
         where: {
           agendamentos: {
             none: { dataHora: agendamento.dataHora },
@@ -206,14 +206,14 @@ export class AgendamentoService {
         );
     }
 
-    const funcionarioId = updateAgendamentoDto?.funcionarioId
-      ? updateAgendamentoDto?.funcionarioId
+    const userId = updateAgendamentoDto?.userId
+      ? updateAgendamentoDto?.userId
       : funcionarioDisponivel?.id;
 
-    if (!funcionarioId) return;
+    if (!userId) return;
 
     const disponivel = await this.isFuncionarioDisponivel(
-      funcionarioId,
+      userId,
       agendamento.dataHora,
     );
 
@@ -226,7 +226,7 @@ export class AgendamentoService {
 
     const agendamentoExistente = await this.prisma.agendamento.findFirst({
       where: {
-        funcionarioId: funcionarioId,
+        userId: userId,
         dataHora: {
           equals: (
             await this.prisma.agendamento.findUnique({
@@ -237,7 +237,7 @@ export class AgendamentoService {
         },
       },
       include: {
-        funcionario: true,
+        User: true,
       },
     });
 
@@ -253,10 +253,10 @@ export class AgendamentoService {
         id: id,
       },
       data: {
-        funcionarioId: funcionarioId,
+        userId: userId,
       },
       include: {
-        funcionario: true,
+        User: true,
       },
     });
 
@@ -286,7 +286,7 @@ export class AgendamentoService {
     // verificar se funcionario está disponivel
 
     const funcionarioDisponivel = await this.isFuncionarioDisponivel(
-      agendamentoMarcado?.funcionarioId,
+      agendamentoMarcado?.id,
       new Date(novaDataMarcada),
     );
     let novoFuncionario;
@@ -294,7 +294,7 @@ export class AgendamentoService {
     const diaDaSemana = new Date(novaDataMarcada).getDay();
 
     if (!funcionarioDisponivel) {
-      novoFuncionario = await this.prisma.funcionario.findFirst({
+      novoFuncionario = await this.prisma.user.findFirst({
         where: {
           agendamentos: {
             none: {
@@ -325,10 +325,10 @@ export class AgendamentoService {
         },
         data: {
           dataHora: novaDataMarcada,
-          funcionarioId: novoFuncionario?.id,
+          userId: novoFuncionario?.id,
         },
         include: {
-          funcionario: true,
+          User: true,
         },
       });
 
@@ -376,20 +376,13 @@ export class AgendamentoService {
     if (!adminEmail && !funcionarioEmail)
       throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
 
-    const isAdmin = await this.prisma.admin.findUnique({
+    const isAdmin = await this.prisma.user.findUnique({
       where: {
         email: adminEmail,
       },
     });
 
-    const isFuncionario = await this.prisma.funcionario.findUnique({
-      where: {
-        email: funcionarioEmail,
-      },
-    });
-
-    if (!isAdmin && !isFuncionario)
-      throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
+    if (!isAdmin) throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
   }
 
   private async isAdmin(headers: Headers) {
@@ -398,7 +391,7 @@ export class AgendamentoService {
     if (!adminEmail)
       throw new HttpException("Sem Permissão!", HttpStatus.LOCKED);
 
-    const isAdmin = await this.prisma.admin.findUnique({
+    const isAdmin = await this.prisma.user.findUnique({
       where: {
         email: adminEmail,
       },
@@ -430,14 +423,14 @@ export class AgendamentoService {
     }
   }
 
-  private async isFuncionarioDisponivel(funcionarioId: string, dataHora: Date) {
+  private async isFuncionarioDisponivel(userId: string, dataHora: Date) {
     const diaSemana = dataHora.getDay(); //0 = Domingo, ....
     const horaAgendamento = dataHora.toTimeString().split(" ")[0]; // pegar apenas HH:mm:ss
 
     // Buscar horários de expediente do funcionário no dia específico
     const horario = await this.prisma.horario.findFirst({
       where: {
-        funcionarioId: funcionarioId,
+        userId: userId,
         diaSemana: diaSemana,
       },
     });
@@ -463,7 +456,7 @@ export class AgendamentoService {
     // Verificar se já existe um agendamento nesse horário
     const agendamentoExistente = await this.prisma.agendamento.findFirst({
       where: {
-        funcionarioId: funcionarioId,
+        userId: userId,
         dataHora: dataHora,
       },
     });
@@ -475,7 +468,7 @@ export class AgendamentoService {
     // Verificar se o funcionário está indisponível nesse horário
     const indisponivel = await this.prisma.indisponibilidade.findFirst({
       where: {
-        funcionarioId: funcionarioId,
+        userId: userId,
         OR: [
           {
             dataInicio: { lte: dataHora }, // Indisponibilidade começa antes ou exatamente nesse horário
