@@ -7,6 +7,7 @@ import { UpdateAuthDto } from "./dto/update-auth.dto";
 import { randomUUID } from "crypto";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
 import { RoleUser } from "@prisma/client";
+import { jwtConstants } from "./constants";
 
 @Injectable()
 export class AuthService {
@@ -46,8 +47,10 @@ export class AuthService {
       email: validUser.email,
       role: validUser.role,
     };
-    console.log("JWT Secret:", process.env.JWT_SECRET);
-    const token = this.jwtService.sign(payload);
+
+    const token = await this.jwtService.signAsync(payload, {
+      secret: jwtConstants.secret,
+    });
 
     return {
       access_token: token,

@@ -7,7 +7,7 @@ import { ProtocoloModule } from "./cliente/protocolo/protocolo.module";
 import { AuthModule } from "./auth/auth.module";
 import { JwtService } from "@nestjs/jwt";
 import { UserModule } from "./user/user.module";
-
+import { ConfigModule } from "@nestjs/config";
 @Module({
   imports: [
     AgendamentoModule,
@@ -15,6 +15,7 @@ import { UserModule } from "./user/user.module";
     ProtocoloModule,
     AuthModule,
     UserModule,
+    ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],
