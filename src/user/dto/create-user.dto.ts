@@ -33,6 +33,10 @@ export class CreateUserDto {
 }
 
 export class HorarioDto {
+  @IsOptional()
+  @IsString()
+  id?: string;
+
   @IsNotEmpty()
   @IsInt()
   diaSemana: number;
