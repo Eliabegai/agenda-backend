@@ -4,17 +4,24 @@ import { Strategy as PassportJwtStrategy } from "passport-jwt";
 import { AuthService } from "./auth.service";
 import { ExtractJwt } from "passport-jwt";
 
+console.log("jwt strastey", process.env.JWT_SECRET);
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(PassportJwtStrategy) {
   constructor(private authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.SECRET_JWT,
+      secretOrKey: process.env.JWT_SECRET || "yourSecretKey",
     });
   }
 
   validate(payload: any) {
-    return { userId: payload.sub, username: payload.username };
+    return {
+      id: payload.id,
+      username: payload.username,
+      email: payload.email,
+      role: payload.role,
+    };
   }
 }

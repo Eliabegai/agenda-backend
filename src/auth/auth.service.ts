@@ -40,8 +40,15 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
       );
 
-    const payload = { username: validUser?.email, sub: validUser?.id };
+    const payload = {
+      username: validUser?.nome,
+      id: validUser?.id,
+      email: validUser.email,
+      role: validUser.role,
+    };
+    console.log("JWT Secret:", process.env.JWT_SECRET);
     const token = this.jwtService.sign(payload);
+
     return {
       access_token: token,
     };
@@ -150,11 +157,12 @@ export class AuthService {
   }
 
   async registerUser(createUserDto: CreateUserDto) {
-    const { email, password, role, nome } = createUserDto;
+    const { email, senha, role, nome } = createUserDto;
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
+
     if (existingUser) {
       throw new HttpException(
         "E-mail já está cadastrado",
@@ -162,17 +170,38 @@ export class AuthService {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(senha, 10);
 
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        senha: hashedPassword,
-        nome,
-        role: role ?? RoleUser.USER, // Se não for passado, assume USER
-      },
-    });
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          email,
+          senha: hashedPassword,
+          nome,
+          role: (role as RoleUser) ?? RoleUser.USER, // Se não for passado, assume USER
+        },
+      });
 
-    return { message: "Usuário criado com sucesso", user };
+      const payload = {
+        username: user?.nome,
+        email: user?.email,
+        id: user?.id,
+        role: user?.role,
+      };
+      const token = this.jwtService.sign(payload);
+
+      return {
+        message: "Usuário criado com sucesso",
+        user,
+        accessToken: token,
+      };
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        { status: HttpStatus, error: error.message },
+        HttpStatus.BAD_REQUEST,
+        { cause: error },
+      );
+    }
   }
 }
