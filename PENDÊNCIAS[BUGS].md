@@ -15,14 +15,17 @@
 
 > **[ PEN ]** - Função para recuperar senha e alterar senha (funcionario ou admin)
 
+> **[ BUG ]** - Se alterar a data do agendamento, verificar se o funcionario agendado tem essa data/horario disponível, se não tiver agendar com outro ou retorar que não há funcionario disponível para essa data/horario.
+
 > **[ PEN ]** - 
 
 
 
+
+
+> **[ PEN ]** - 
 
 > **[ BUG ]** - 
-
-> **[ PEN ]** - 
 
 
 

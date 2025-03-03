@@ -27,8 +27,9 @@ export class AgendamentoService {
     const funcionarioDisponivel = await this.prisma.user.findFirst({
       where: {
         agendamentos: {
-          none: { dataHora: createAgendamentoDto.dataHora },
+          none: { dataHora: dataHora },
         },
+        role: "USER",
       },
     });
 
@@ -110,7 +111,14 @@ export class AgendamentoService {
 
     const agendamentos = await this.prisma.agendamento.findMany({
       include: {
-        User: true,
+        User: {
+          omit: {
+            senha: true,
+            criadoEm: true,
+            atualizadoEm: true,
+            passwordResetTokenId: true,
+          },
+        },
         protocolo: {
           include: {
             cliente: true,
@@ -128,7 +136,14 @@ export class AgendamentoService {
         id,
       },
       include: {
-        User: true,
+        User: {
+          omit: {
+            senha: true,
+            criadoEm: true,
+            atualizadoEm: true,
+            passwordResetTokenId: true,
+          },
+        },
         protocolo: {
           include: {
             cliente: true,
@@ -157,11 +172,28 @@ export class AgendamentoService {
           lte: endDate,
         },
       },
-      include: {
-        User: true,
+      select: {
+        id: true,
+        dataHora: true,
+        status: true,
+        userId: true,
+        User: {
+          omit: {
+            senha: true,
+            criadoEm: true,
+            atualizadoEm: true,
+            passwordResetTokenId: true,
+          },
+        },
+        protocoloId: true,
         protocolo: {
           include: {
-            cliente: true,
+            cliente: {
+              omit: {
+                criadoEm: true,
+                atualizadoEm: true,
+              },
+            },
           },
         },
       },
@@ -328,7 +360,14 @@ export class AgendamentoService {
           userId: novoFuncionario?.id,
         },
         include: {
-          User: true,
+          User: {
+            omit: {
+              senha: true,
+              atualizadoEm: true,
+              criadoEm: true,
+              passwordResetTokenId: true,
+            },
+          },
         },
       });
 
