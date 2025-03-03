@@ -5,7 +5,7 @@ import * as bcrypt from "bcryptjs";
 import { CreateAuthDto } from "./dto/create-auth.dto";
 import { UpdateAuthDto } from "./dto/update-auth.dto";
 import { randomUUID } from "crypto";
-import { CreateUserDto } from "src/user/dto/create-user.dto";
+import { CreateUserDto, HorarioDto } from "src/user/dto/create-user.dto";
 import { RoleUser } from "@prisma/client";
 import { jwtConstants } from "./constants";
 
@@ -160,7 +160,7 @@ export class AuthService {
   }
 
   async registerUser(createUserDto: CreateUserDto) {
-    const { email, senha, role, nome } = createUserDto;
+    const { email, senha, role, nome, horarios } = createUserDto;
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
@@ -175,6 +175,44 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(senha, 10);
 
+    const horariosDefault: HorarioDto[] = [
+      {
+        diaSemana: 1,
+        startTime: "10:00:00",
+        endTime: "17:00:00",
+        breakStart: "12:00:00",
+        breakEnd: "13:00:00",
+      },
+      {
+        diaSemana: 2,
+        startTime: "10:00:00",
+        endTime: "17:00:00",
+        breakStart: "12:00:00",
+        breakEnd: "13:00:00",
+      },
+      {
+        diaSemana: 3,
+        startTime: "10:00:00",
+        endTime: "17:00:00",
+        breakStart: "12:00:00",
+        breakEnd: "13:00:00",
+      },
+      {
+        diaSemana: 4,
+        startTime: "10:00:00",
+        endTime: "17:00:00",
+        breakStart: "12:00:00",
+        breakEnd: "13:00:00",
+      },
+      {
+        diaSemana: 5,
+        startTime: "10:00:00",
+        endTime: "17:00:00",
+        breakStart: "12:00:00",
+        breakEnd: "13:00:00",
+      },
+    ];
+
     try {
       const user = await this.prisma.user.create({
         data: {
@@ -185,13 +223,43 @@ export class AuthService {
         },
       });
 
+      if (horarios && role === "USER") {
+        await this.prisma.horario.createMany({
+          data: horarios?.map((horario: HorarioDto) => {
+            return {
+              diaSemana: horario.diaSemana,
+              startTime: horario.startTime,
+              endTime: horario.endTime,
+              breakStart: horario.breakStart ?? "",
+              breakEnd: horario.breakEnd ?? "",
+              userId: user.id,
+            };
+          }),
+        });
+      } else {
+        await this.prisma.horario.createMany({
+          data: horariosDefault?.map((horario: HorarioDto) => {
+            return {
+              diaSemana: horario.diaSemana,
+              startTime: horario.startTime,
+              endTime: horario.endTime,
+              breakStart: horario.breakStart ?? "",
+              breakEnd: horario.breakEnd ?? "",
+              userId: user.id,
+            };
+          }),
+        });
+      }
+
       const payload = {
         username: user?.nome,
         email: user?.email,
         id: user?.id,
         role: user?.role,
       };
-      const token = this.jwtService.sign(payload);
+      const token = this.jwtService.sign(payload, {
+        secret: jwtConstants.secret,
+      });
 
       return {
         message: "Usuário criado com sucesso",

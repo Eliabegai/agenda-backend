@@ -7,9 +7,13 @@ export class UserService {
 
   async findAllUsers() {
     const users = await this.prisma.user.findMany({
-      include: {
-        _count: true,
+      select: {
+        id: true,
+        role: true,
+        nome: true,
+        email: true,
         agendamentos: true,
+        indisponibilidades: true,
         horarios: true,
       },
     });
