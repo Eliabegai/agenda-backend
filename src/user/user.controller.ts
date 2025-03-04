@@ -8,10 +8,12 @@ import {
   Body,
   Headers,
   Query,
+  Post,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { JwtAuthGuard } from "src/auth/jtw-auth.guard";
 import { UpdateUserDto } from "./dto/update-user.dto";
+import { IndisponibilidadeDto } from "./dto/create-user.dto";
 
 @UseGuards(JwtAuthGuard)
 @Controller("user")
@@ -31,6 +33,19 @@ export class UserController {
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.userService.findOne(id);
+  }
+
+  @Post(":id/indisponibilidade")
+  funcionarioIndisponivel(
+    @Param("id") id: string,
+    @Body() indisponibilidadeDto: IndisponibilidadeDto,
+    @Headers() headers: Headers,
+  ) {
+    return this.userService.funcionarioIndisponivel(
+      id,
+      indisponibilidadeDto,
+      headers,
+    );
   }
 
   @Patch(":id")

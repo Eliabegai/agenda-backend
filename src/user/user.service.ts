@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { HorarioDto } from "./dto/create-user.dto";
+import { HorarioDto, IndisponibilidadeDto } from "./dto/create-user.dto";
 
 @Injectable()
 export class UserService {
@@ -58,20 +58,6 @@ export class UserService {
   async findUserByNome(nome: string, headers: Headers) {
     await this.isAdmin(headers);
 
-    // const user = await this.prisma.user.findMany({
-    //   where: {
-    //     nome: {
-    //       contains: nome,
-    //       mode: "insensitive",
-    //     },
-    //   },
-    //   select: {
-    //     id: true,
-    //     nome: true,
-    //     email: true,
-    //   },
-    // });
-
     const getUser = await this.prisma.$queryRaw`
       SELECT id, nome, email FROM "User" 
         WHERE unaccent(nome) ILIKE unaccent(${`%${nome}%`})
@@ -81,6 +67,74 @@ export class UserService {
       message: `find user by nome: ${nome}`,
       getUser,
     };
+  }
+
+  async funcionarioIndisponivel(
+    id: string,
+    indisponibilidadeDto: IndisponibilidadeDto,
+    headers: Headers,
+  ) {
+    await this.isAdmin(headers);
+
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user)
+      return new HttpException(
+        "Funcionário não encontrado!",
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const { dataInicio, dataFim, motivo } = indisponibilidadeDto;
+
+    if (!dataInicio || !dataFim)
+      return new HttpException(
+        "Não definido a data de início e fim",
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const inicio = new Date(dataInicio);
+    const fim = new Date(dataFim);
+    const horaInicio = inicio.toTimeString().split(" ")[0]; // pegar apenas HH:mm:ss
+    const horaFim = fim.toTimeString().split(" ")[0]; // pegar apenas HH:mm:ss
+
+    const existingIndisponibilidade =
+      await this.prisma.indisponibilidade.findFirst({
+        where: {
+          dataInicio: inicio,
+          dataFim: fim,
+          userId: id,
+        },
+      });
+    if (existingIndisponibilidade)
+      return new HttpException("Data já existe", HttpStatus.BAD_REQUEST);
+
+    try {
+      const criarIndisponibilidade = await this.prisma.indisponibilidade.create(
+        {
+          data: {
+            dataInicio: inicio,
+            dataFim: fim,
+            userId: id,
+            inicio: horaInicio,
+            fim: horaFim,
+            motivo: motivo || "",
+          },
+        },
+      );
+
+      return criarIndisponibilidade;
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: "Erro ao cadastrar Indisponibilidade",
+        },
+        HttpStatus.BAD_REQUEST,
+        { cause: error },
+      );
+    }
   }
 
   async updateFuncionarioById(

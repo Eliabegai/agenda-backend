@@ -62,7 +62,7 @@ docker build -t agenda-backend .
 
 ## Executa imagem
 ```sh
-docker run -p 3000:3000 agenda-backend
+docker run -d -p 3000:3000 agenda-backend
 ```
 
 ## Criar novo recurso completo
