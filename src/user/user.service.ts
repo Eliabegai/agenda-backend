@@ -9,6 +9,11 @@ export class UserService {
 
   async findAllUsers() {
     const users = await this.prisma.user.findMany({
+      where: {
+        NOT: {
+          role: "ADMIN",
+        },
+      },
       select: {
         id: true,
         role: true,
@@ -34,6 +39,7 @@ export class UserService {
           },
         },
         agendamentos: true,
+        indisponibilidades: true,
       },
       omit: {
         senha: true,

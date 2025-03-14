@@ -19,7 +19,9 @@
 
 > **[ PEN ]** - Fazer a busca pelo funcionario (user.user) pelo nome, no momento está apenas pelo ID
 
+> **[ PEN ]** - Ao buscar os funcionarios, trazer apenas com role 'user', admin não.
 
+> **[ PEN ]** - Criar outra rota para ver admins.. mas não será usada no front.
 
 
 
