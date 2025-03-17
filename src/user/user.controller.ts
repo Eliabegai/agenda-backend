@@ -39,26 +39,33 @@ export class UserController {
   funcionarioIndisponivel(
     @Param("id") id: string,
     @Body() indisponibilidadeDto: IndisponibilidadeDto,
-    @Headers() headers: Headers,
   ) {
-    return this.userService.funcionarioIndisponivel(
-      id,
-      indisponibilidadeDto,
-      headers,
-    );
+    return this.userService.funcionarioIndisponivel(id, indisponibilidadeDto);
   }
 
   @Patch(":id")
   updateUserById(
     @Param("id") id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @Headers() headers: Headers,
   ) {
-    return this.userService.updateFuncionarioById(id, updateUserDto, headers);
+    return this.userService.updateFuncionarioById(id, updateUserDto);
   }
 
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.userService.remove(id);
+  }
+
+  @Delete(":id/indisponibilidade/:idIndisp")
+  removeIndisponibilidadeUser(
+    @Param("id") id: string,
+    @Param("idIndisp") idIndisp: string,
+  ) {
+    return this.userService.removeIndisponibilidadeUser(id, idIndisp);
+  }
+
+  @Delete("/horario/:id")
+  removeHorarioUser(@Param("id") id: string) {
+    return this.userService.removeHorarioUser(id);
   }
 }

@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { HorarioDto, IndisponibilidadeDto } from "./dto/create-user.dto";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class UserService {
@@ -64,24 +65,55 @@ export class UserService {
   async findUserByNome(nome: string, headers: Headers) {
     await this.isAdmin(headers);
 
-    const getUser = await this.prisma.$queryRaw`
-      SELECT id, nome, email FROM "User" 
-        WHERE unaccent(nome) ILIKE unaccent(${`%${nome}%`})
-    `;
+    try {
+      // const getUser = await this.prisma.$queryRaw`
+      //   SELECT
+      //     u.id,
+      //     u.nome,
+      //     u.email,
+      //     h.horarios,           -- Traz todas as colunas de horario
+      //     i.indisponibilidades, -- Traz todas as colunas de indisponibilidade
+      //     a.agendamentos        -- Traz todas as colunas de agendamento
+      //   FROM "User" u
+      //   LEFT JOIN "Horario" h ON h.userId = u.id
+      //   LEFT JOIN "Indisponibilidade" i ON i.userId = u.id
+      //   LEFT JOIN "Agendamento" a ON a.userId = u.id
+      //   WHERE unaccent(u.nome) ILIKE unaccent(${`%${nome}%`})
+      // `;
+      const getUser = await this.prisma.user.findMany({
+        where: {
+          nome: {
+            contains: nome,
+            mode: "insensitive",
+          },
+        },
+        select: {
+          id: true,
+          nome: true,
+          email: true,
+          horarios: true, // Prisma já pega a relação correta
+          indisponibilidades: true,
+          agendamentos: true,
+        },
+      });
 
-    return {
-      message: `find user by nome: ${nome}`,
-      getUser,
-    };
+      return {
+        data: getUser,
+      };
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        { error: error.message },
+        HttpStatus.BAD_REQUEST,
+        { cause: error },
+      );
+    }
   }
 
   async funcionarioIndisponivel(
     id: string,
     indisponibilidadeDto: IndisponibilidadeDto,
-    headers: Headers,
   ) {
-    await this.isAdmin(headers);
-
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -143,18 +175,14 @@ export class UserService {
     }
   }
 
-  async updateFuncionarioById(
-    id: string,
-    updateUserDto: UpdateUserDto,
-    headers: Headers,
-  ) {
-    await this.isAdmin(headers);
-
-    const { email, nome, role, horarios } = updateUserDto;
+  async updateFuncionarioById(id: string, updateUserDto: UpdateUserDto) {
+    console.log(updateUserDto);
+    const { email, nome, role, horarios, senha, novaSenha } = updateUserDto;
 
     const existingUser = await this.prisma.user.findUnique({
       where: { id },
     });
+
     if (!existingUser) {
       return new HttpException(
         "Usuário não encontrado",
@@ -162,31 +190,58 @@ export class UserService {
       );
     }
 
-    const updateData = {
+    const updateData: any = {
       nome: nome,
       email: email,
       role: role,
     };
 
+    // Verificação e atualização de senha
+    if (senha || novaSenha) {
+      if (!senha || !novaSenha) {
+        throw new HttpException(
+          "Para atualizar a senha, forneça tanto a senha atual quanto a nova senha",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const isPasswordValid = await bcrypt.compare(senha, existingUser.senha);
+      console.log(horarios);
+
+      if (horarios) {
+        await this.updateHorarios(id, horarios);
+      }
+
+      if (!isPasswordValid) {
+        throw new HttpException(
+          "Senha atual incorreta",
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      const hashedNewPassword = await bcrypt.hash(novaSenha, 10);
+      updateData.senha = hashedNewPassword;
+    }
+
     if (horarios) {
       await this.updateHorarios(id, horarios);
     }
 
-    const updateUser = await this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: updateData,
-      include: {
-        horarios: true,
-      },
-    });
+    try {
+      const updateUser = await this.prisma.user.update({
+        where: { id },
+        data: updateData,
+        include: { horarios: true },
+      });
 
-    return {
-      message: "Funcionário atualizado com sucesso",
-      data: updateUser,
-      status: HttpStatus.OK,
-    };
+      return { data: updateUser };
+    } catch (error) {
+      throw new HttpException(
+        "Erro ao atualizar usuário",
+        HttpStatus.BAD_REQUEST,
+        { cause: error },
+      );
+    }
   }
 
   async remove(id: string) {
@@ -209,6 +264,67 @@ export class UserService {
       data: removeUser,
       status: HttpStatus.OK,
     };
+  }
+
+  async removeHorarioUser(id: string) {
+    const existingHorario = await this.prisma.horario.findUnique({
+      where: { id },
+    });
+    if (!existingHorario) {
+      return new HttpException(
+        "Horário não encontrado",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    try {
+      await this.prisma.horario.delete({
+        where: {
+          id,
+        },
+      });
+
+      return {
+        message: `Removido Horário ID ${id}`,
+      };
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        { error: error.message },
+        HttpStatus.BAD_REQUEST,
+        { cause: error },
+      );
+    }
+  }
+
+  async removeIndisponibilidadeUser(id: string, idIndisp: string) {
+    const existingIndisponibilidade =
+      await this.prisma.indisponibilidade.findUnique({
+        where: { id: idIndisp, userId: id },
+      });
+    if (!existingIndisponibilidade) {
+      return new HttpException(
+        "Indisponibilidade não encontrada",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    try {
+      await this.prisma.indisponibilidade.delete({
+        where: {
+          id: idIndisp,
+        },
+      });
+
+      return {
+        message: `Removido Indisponibilidade ID ${id}`,
+      };
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        { error: error.message },
+        HttpStatus.BAD_REQUEST,
+        { cause: error },
+      );
+    }
   }
 
   private async isAdmin(headers: Headers) {

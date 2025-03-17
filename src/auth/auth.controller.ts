@@ -24,8 +24,8 @@ export class AuthController {
     @Headers() headers: Headers,
     @Body() updateSenha: UpdateAuthDto,
   ) {
-    const email: string = headers["admin"];
-    return this.authService.alterarSenhaAdmin(updateSenha, email);
+    const email: string = headers["email"];
+    return this.authService.alterarSenha(updateSenha, email);
   }
 
   @Post("reset-password")

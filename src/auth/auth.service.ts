@@ -68,7 +68,7 @@ export class AuthService {
     };
   }
 
-  async alterarSenhaAdmin(updateSenha: UpdateAuthDto, email: string) {
+  async alterarSenha(updateSenha: UpdateAuthDto, email: string) {
     const { senhaAntiga, novaSenha } = updateSenha;
 
     const usuario = await this.prisma.user.findUnique({
