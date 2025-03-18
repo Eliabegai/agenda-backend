@@ -176,7 +176,6 @@ export class UserService {
   }
 
   async updateFuncionarioById(id: string, updateUserDto: UpdateUserDto) {
-    console.log(updateUserDto);
     const { email, nome, role, horarios, senha, novaSenha } = updateUserDto;
 
     const existingUser = await this.prisma.user.findUnique({
@@ -206,7 +205,6 @@ export class UserService {
       }
 
       const isPasswordValid = await bcrypt.compare(senha, existingUser.senha);
-      console.log(horarios);
 
       if (horarios) {
         await this.updateHorarios(id, horarios);

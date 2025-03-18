@@ -21,8 +21,6 @@ export class AgendamentoService {
     const data = new Date(dataHora);
     const agora = new Date();
 
-    console.log(data, agora);
-
     const diferencaHoras =
       (data.getTime() - agora.getTime()) / (1000 * 60 * 60);
 
@@ -112,10 +110,10 @@ export class AgendamentoService {
         return agendamento;
       }
 
-      return {
-        message: "Já existe um agendamento nessa data e protocolo!",
-        data: existingAgendamentoByHoraAndProtocolo,
-      };
+      throw new HttpException(
+        "Já existe um agendamento nessa data e protocolo!",
+        HttpStatus.CONFLICT,
+      );
     } catch (error) {
       throw new HttpException(
         {
