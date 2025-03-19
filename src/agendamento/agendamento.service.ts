@@ -219,6 +219,11 @@ export class AgendamentoService {
           },
         },
       },
+      orderBy: {
+        User: {
+          nome: "asc",
+        },
+      },
     });
     return { data: rangeAgendamento, count: rangeAgendamento.length };
   }
@@ -228,6 +233,8 @@ export class AgendamentoService {
     updateAgendamentoDto: UpdateAgendamentoDto,
     headers: Headers,
   ) {
+    console.log(id);
+    console.log(updateAgendamentoDto);
     await this.isAdminOrFuncionario(headers);
 
     let funcionarioDisponivel;
@@ -244,11 +251,16 @@ export class AgendamentoService {
         HttpStatus.BAD_REQUEST,
       );
 
+    console.log(agendamento.dataHora);
+
     if (!updateAgendamentoDto.userId) {
       funcionarioDisponivel = await this.prisma.user.findFirst({
         where: {
           agendamentos: {
             none: { dataHora: agendamento.dataHora },
+          },
+          NOT: {
+            role: "ADMIN",
           },
         },
       });
@@ -260,7 +272,9 @@ export class AgendamentoService {
         );
     }
 
-    const userId = updateAgendamentoDto?.userId
+    console.log(funcionarioDisponivel);
+
+    const userId: string = updateAgendamentoDto?.userId
       ? updateAgendamentoDto?.userId
       : funcionarioDisponivel?.id;
 
@@ -273,7 +287,7 @@ export class AgendamentoService {
 
     if (!disponivel) {
       throw new HttpException(
-        "Funcionário não está disponível neste horário",
+        "Não tem funcionário disponível neste horário",
         HttpStatus.CONFLICT,
       );
     }

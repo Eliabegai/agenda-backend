@@ -24,6 +24,9 @@ export class UserService {
         indisponibilidades: true,
         horarios: true,
       },
+      orderBy: {
+        nome: "asc",
+      },
     });
     return { data: users, count: users.length };
   }
@@ -94,6 +97,9 @@ export class UserService {
           horarios: true, // Prisma já pega a relação correta
           indisponibilidades: true,
           agendamentos: true,
+        },
+        orderBy: {
+          nome: "asc",
         },
       });
 
