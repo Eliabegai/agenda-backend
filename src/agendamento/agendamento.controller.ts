@@ -16,6 +16,7 @@ import { AgendamentoService } from "./agendamento.service";
 import { CreateAgendamentoDto } from "./dto/create-agendamento.dto";
 import { UpdateAgendamentoDto } from "./dto/update-agendamento.dto";
 import { JwtAuthGuard } from "src/auth/jtw-auth.guard";
+import { Public } from "src/auth/public.decorator";
 
 @Controller("agendamento")
 export class AgendamentoController {
@@ -30,6 +31,21 @@ export class AgendamentoController {
   @Get()
   findAll(@Headers() headers: Headers) {
     return this.agendamentoService.findAll(headers);
+  }
+
+  @Public()
+  @Get("agenda")
+  findAllAgendamentos(
+    @Query("start") start: string,
+    @Query("end") end: string,
+  ) {
+    if (!start) {
+      return new HttpException(
+        'Os parâmetros "start" são obrigatórios.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.agendamentoService.findAllAgendamentos(start, end);
   }
 
   @UseGuards(JwtAuthGuard)

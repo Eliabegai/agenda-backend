@@ -115,7 +115,7 @@ export class AuthService {
     const token = randomUUID();
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 1);
-    const url = "http://localhost:3000";
+    const url = process.env.URL_SEND_REQUEST_PASSWORD;
 
     await this.prisma.passwordResetToken.upsert({
       where: { id: user.id },
@@ -125,7 +125,7 @@ export class AuthService {
 
     // Simulação de envio de e-mail (substituir por serviço real)
     console.log(
-      `Envie este link para o usuário: http://localhost:3000/auth/reset-password?token=${token}`,
+      `Envie este link para o usuário: ${url}/auth/reset-password?token=${token}`,
     );
 
     return {

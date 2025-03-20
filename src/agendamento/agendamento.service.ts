@@ -151,6 +151,28 @@ export class AgendamentoService {
     return { data: agendamentos, count: agendamentos.length };
   }
 
+  async findAllAgendamentos(start: string, end: string) {
+    const startDate = new Date(start);
+    const endDate = end ? new Date(end) : new Date();
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new HttpException(
+        'Formato de data inválido. Use "YYYY-MM-DDTHH:mm:ss.sssZ".',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const agendamentos = await this.prisma.agendamento.findMany({
+      where: {
+        dataHora: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+    });
+    return { data: agendamentos, count: agendamentos.length };
+  }
+
   async findOne(id: string, headers: Headers) {
     await this.isAdminOrFuncionario(headers);
     const agendamentoById = await this.prisma.agendamento.findFirst({
@@ -233,8 +255,6 @@ export class AgendamentoService {
     updateAgendamentoDto: UpdateAgendamentoDto,
     headers: Headers,
   ) {
-    console.log(id);
-    console.log(updateAgendamentoDto);
     await this.isAdminOrFuncionario(headers);
 
     let funcionarioDisponivel;
@@ -250,8 +270,6 @@ export class AgendamentoService {
         "Agendamento não encontrado",
         HttpStatus.BAD_REQUEST,
       );
-
-    console.log(agendamento.dataHora);
 
     if (!updateAgendamentoDto.userId) {
       funcionarioDisponivel = await this.prisma.user.findFirst({
@@ -271,8 +289,6 @@ export class AgendamentoService {
           HttpStatus.CONFLICT,
         );
     }
-
-    console.log(funcionarioDisponivel);
 
     const userId: string = updateAgendamentoDto?.userId
       ? updateAgendamentoDto?.userId
@@ -499,8 +515,10 @@ export class AgendamentoService {
   }
 
   private async isFuncionarioDisponivel(userId: string, dataHora: Date) {
+    console.log("dataHora", dataHora);
     const diaSemana = dataHora.getDay(); //0 = Domingo, ....
     const horaAgendamento = dataHora.toTimeString().split(" ")[0]; // pegar apenas HH:mm:ss
+    console.log("horaAgendamento", horaAgendamento);
 
     // Buscar horários de expediente do funcionário no dia específico
     const horario = await this.prisma.horario.findFirst({
@@ -509,6 +527,8 @@ export class AgendamentoService {
         diaSemana: diaSemana,
       },
     });
+
+    console.log("horario", horario);
 
     if (!horario) return false; // Funcionário não tem essa hora disponível
 
