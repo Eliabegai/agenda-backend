@@ -515,10 +515,8 @@ export class AgendamentoService {
   }
 
   private async isFuncionarioDisponivel(userId: string, dataHora: Date) {
-    console.log("dataHora", dataHora);
     const diaSemana = dataHora.getDay(); //0 = Domingo, ....
-    const horaAgendamento = dataHora.toTimeString().split(" ")[0]; // pegar apenas HH:mm:ss
-    console.log("horaAgendamento", horaAgendamento);
+    const horaAgendamento = dataHora.toTimeString().split(" ")[0]; // pegar apenas HH:mm:
 
     // Buscar horários de expediente do funcionário no dia específico
     const horario = await this.prisma.horario.findFirst({
@@ -527,8 +525,6 @@ export class AgendamentoService {
         diaSemana: diaSemana,
       },
     });
-
-    console.log("horario", horario);
 
     if (!horario) return false; // Funcionário não tem essa hora disponível
 
